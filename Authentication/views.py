@@ -38,7 +38,7 @@ def home(request):
 
 		delivery=database.child('Deliverers').shallow().get().val()
 		for i in delivery:
-			curemail=database.child('Vendors').child(i).child('email').get().val()
+			curemail=database.child('Deliverers').child(i).child('email').get().val()
 			if curemail == request.user.email:
 				return render(request, 'Authentication/home.html',{'usertype':'Delivery'})
 
