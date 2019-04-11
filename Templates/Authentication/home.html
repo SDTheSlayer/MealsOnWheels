@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+    Home! <a href="{% url 'Authentication:logout' %}">Logout</a>
+    {% if user.is_authenticated %}
+             <p class="display-4">Hello, {{ user.username }} User Type: {{ usertype }} </p>
+
+	{% else %}
+             <a class="lead" href="{% url 'Authentication:login' %}">Log in</a>
+	{% endif %}
+</body>
+</html>
