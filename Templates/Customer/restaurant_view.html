@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Restaurant Home</title>
+</head>
+<body>
+    Home! <a href="{% url 'Authentication:logout' %}">Logout</a>
+    <p class="display-4">Hello, {{ user.first_name }} {{ user.last_name }} </p>
+Vendor's list
+<br><br>
+{{ foo }}
+</body>
+</html>

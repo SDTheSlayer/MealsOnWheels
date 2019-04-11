@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Home</title>
+</head>
+<body>
+    Home! <a href="{% url 'Authentication:logout' %}">Logout</a>
+    <p class="display-4">Hello, {{ user.first_name }} {{ user.last_name }} </p>
+Vendor's list
+<br><br>
+{% for i,j in ven_list.items %}
+    <form method="POST" action="{% url 'Customer:restaurant' %}">
+        {% csrf_token %}
+        <input type="submit" value="{{ i }}" name="restaurant">{#{{ i }}#}
+    </form>
+{#    <a href="{% url 'Customer:restaurant' %}?restaurant={{ i }}">{{ i }}</a>#}
+    <br><p>
+    {% for k,l in j.items %}
+        {{ k }} : {{ l }}
+    <br>
+    {% endfor %}
+    </p><br>
+{% endfor %}
+</body>
+</html>
