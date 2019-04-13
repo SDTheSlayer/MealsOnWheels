@@ -14,12 +14,13 @@ firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
 
-all_list= database.get().each()
+all_list = database.get().each()
 
-data={}
+data = {}
 
 for i in all_list:
-    data.update({i.key():i.val()})
+    data.update({i.key(): i.val()})
+
 
 def home(request):
     all_list = database.get().each()
@@ -29,18 +30,18 @@ def home(request):
     vendors = data['Vendors']
     ven_list = {}
     for i in vendors:
-        cur=vendors[i]
+        cur = vendors[i]
         addr = cur['address']
         ctime = cur['closingTime']
-        email =cur['email']
+        email = cur['email']
         name = cur['name']
-        otime =  cur['openingTime']
+        otime = cur['openingTime']
         phone = cur['phone']
-        _type =cur['type']
-        avgprice=cur['avgPrice']
+        _type = cur['type']
+        avgprice = cur['avgPrice']
         time = str(otime) + ":00 - " + str(ctime) + ":00"
         d = dict({'Address': addr, 'Time': time, 'Email': email, 'phone': phone,
-                  'Type': _type,'Price':avgprice})
+                  'Type': _type, 'Price': avgprice})
         ven_list.update({name: d})
     return render(request, 'Customer/custhome.html', {'ven_list': ven_list})
 
@@ -59,12 +60,12 @@ def rest_view(request):
         if vendors[i]['name'] == restname:
             uid = i
             break
-    menu=data['Menus']
+    menu = data['Menus']
     if uid in menu:
-        restmenu=menu[uid]
-        main=restmenu["Main Course"]
-        dessert=restmenu["Dessert"]
-        bev=restmenu["Beverages"]
+        restmenu = menu[uid]
+        main = restmenu["Main Course"]
+        dessert = restmenu["Dessert"]
+        bev = restmenu["Beverages"]
     return render(request, 'Customer/restaurant_view.html', {'Main_Course': main, 'Beverages': bev, "Dessert": dessert,
                                                              "uid": uid})
 
@@ -76,7 +77,7 @@ def profile_view(request):
         data.update({i.key(): i.val()})
     users = data['Users']
     for i in users:
-        curuser= users[i]
+        curuser = users[i]
         if curuser['email'] == request.user.email:
             uid = i
             curaddress = curuser['deliveryAddress']
@@ -103,20 +104,21 @@ def cart_view(request):
     data = {}
     for i in all_list:
         data.update({i.key(): i.val()})
-    restid=request.POST.get('restaurant')
-    order= {}
+    restid = request.POST.get('restaurant')
+    order = {}
     total = 0
-    restmenu=data['Menus'][restid]
-    for j in {'Main Course','Dessert','Beverages'}:
+    restmenu = data['Menus'][restid]
+    for j in {'Main Course', 'Dessert', 'Beverages'}:
         for i in restmenu[j]:
             item = restmenu[j][i]
             quantity = request.POST.get(i)
-            quantity=int(quantity)
+            quantity = int(quantity)
             if quantity > 0:
                 price = item['price']
                 price = int(price)
-                item = dict({"quantity":quantity,"price":price})
-                order.update({i:item})
-                total=total+price*quantity
-
-    return render(request, 'Customer/cart.html',{"order":order, "restid":restid, "total":total})
+                item = dict({"quantity": quantity, "price": price})
+                order.update({i: item})
+                total = total + price * quantity
+    transaction = dict({"order": order, "restid": restid, "total": total})
+    return render(request, 'Customer/cart.html', {"order": order, "restid": restid, "total": total,
+                                                  "restname": data['Vendors'][restid]['name']})
