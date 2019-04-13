@@ -37,7 +37,8 @@ def home(request):
         otime =  cur['openingTime']
         phone = cur['phone']
         _type =cur['type']
-        d = dict({'Address': addr, 'ClosingTime': ctime, 'Email': email, 'OpeningTime': otime, 'phone': phone,
+        time = str(otime) + ":00 - " + str(ctime) + ":00"
+        d = dict({'Address': addr, 'Time': time, 'Email': email, 'phone': phone,
                   'Type': _type})
         ven_list.update({name: d})
     return render(request, 'Customer/custhome.html', {'ven_list': ven_list})
