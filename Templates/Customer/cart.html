@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Restaurant Home</title>
+</head>
+<body>
+    Home! <a href="{% url 'Authentication:logout' %}">Logout</a>
+    <p class="display-4">Hello, {{ user.first_name }} {{ user.last_name }} </p>
+Cart
+<br><br>
+    Order Summary : <br> <br>
+{% for i,j in order.items %}
+
+    {{ i }}
+    <br><p>
+    {% for k,l in j.items %}
+        {{ k }} : {{ l }}
+    <br>
+    {% endfor %}
+    </p><br>
+{% endfor %}
+
+Total : {{ total }}
+
+</body>
+</html>

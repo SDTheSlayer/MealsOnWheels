@@ -5,14 +5,14 @@
     <title>Customer Home</title>
 </head>
 <body>
-    Home! <a href="{% url 'Authentication:logout' %}">Logout</a>
+    Home! <a href="{% url 'Authentication:logout' %}">Logout</a>  <a href="{% url 'Customer:profile' %}">Edit Profile</a>
     <p class="display-4">Hello, {{ user.first_name }} {{ user.last_name }} </p>
 Vendor's list
 <br><br>
 {% for i,j in ven_list.items %}
     <form method="POST" action="{% url 'Customer:restaurant' %}">
         {% csrf_token %}
-        <input type="submit" value="{{ i }}" name="restaurant">{#{{ i }}#}
+        <input type="submit" value="{{ i }}" name="restaurant">
     </form>
 {#    <a href="{% url 'Customer:restaurant' %}?restaurant={{ i }}">{{ i }}</a>#}
     <br><p>

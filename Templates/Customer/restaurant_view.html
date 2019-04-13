@@ -9,10 +9,15 @@
     <p class="display-4">Hello, {{ user.first_name }} {{ user.last_name }} </p>
 Menu
 <br><br>
+ <form method="POST" action="{% url 'Customer:cart' %}">
+        {% csrf_token %}
+   <input type="hidden" value="{{ uid }}" name="restaurant" >{#{{ i }}#}
+
     Main Course : <br> <br>
 {% for i,j in Main_Course.items %}
 
     {{ i }}
+    <input type="number" value="0" min="0" name="{{ i }}">{#{{ i }}#}
     <br><p>
     {% for k,l in j.items %}
         {{ k }} : {{ l }}
@@ -24,6 +29,7 @@ Menu
 {% for i,j in Beverages.items %}
 
     {{ i }}
+    <input type="number" value="0" min="0" name="{{ i }}">{#{{ i }}#}
     <br><p>
     {% for k,l in j.items %}
         {{ k }} : {{ l }}
@@ -35,6 +41,7 @@ Menu
 {% for i,j in Dessert.items %}
 
     {{ i }}
+    <input type="number" value="0" min="0" name="{{ i }}">{#{{ i }}#}
     <br><p>
     {% for k,l in j.items %}
         {{ k }} : {{ l }}
@@ -42,5 +49,7 @@ Menu
     {% endfor %}
     </p><br>
 {% endfor %}
+ <input type="submit" value="Add To Cart" name="cart">
+ </form>
 </body>
 </html>

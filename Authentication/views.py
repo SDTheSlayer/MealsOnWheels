@@ -15,9 +15,16 @@ firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
 
+all_list= database.get().each()
+
+data={}
+
+for i in all_list:
+    data.update({i.key():i.val()})
 
 # Create your views here.
 def login_page(request):
+
     if request.user.is_authenticated:
         redirect('Authentication:home')
     return render(request, 'Authentication/login_page.html')
@@ -31,22 +38,28 @@ def logout_view(request):
 
 
 def home(request):
+    all_list = database.get().each()
+
+    data = {}
+
+    for i in all_list:
+        data.update({i.key(): i.val()})
     if request.user.is_authenticated:
-        customers = database.child('Users').shallow().get().val()
+        customers = data['Users']
         for i in customers:
-            curemail = database.child('Users').child(i).child('email').get().val()
+            curemail = customers[i]['email']
             if curemail == request.user.email:
                 return redirect('Customer:home')
 
-        vendors = database.child('Vendors').shallow().get().val()
+        vendors = data['Vendors']
         for i in vendors:
-            curemail = database.child('Vendors').child(i).child('email').get().val()
+            curemail = vendors[i]['email']
             if curemail == request.user.email:
                 return render(request, 'Authentication/home.html', {'usertype': 'Vendor'})
 
-        delivery = database.child('Deliverers').shallow().get().val()
+        delivery = data['Deliverers']
         for i in delivery:
-            curemail = database.child('Deliverers').child(i).child('email').get().val()
+            curemail = Deliverers[i]['email']
             if curemail == request.user.email:
                 return render(request, 'Authentication/home.html', {'usertype': 'Delivery'})
 
@@ -66,8 +79,8 @@ def signup(request):
             phone_number = form.cleaned_data.get('phone_number')
             address = address_line1 + ", " + city
             name = first_name + " " + last_name
-            data = {"deliveryAddress": address, "email": request.user.email, "name": name, "phone": phone_number}
-            database.child("Users").push(data)
+            newdata = {"deliveryAddress": address, "email": request.user.email, "name": name, "phone": phone_number}
+            database.child("Users").push(newdata)
             return redirect('Authentication:home')
     else:
         form = SignUpForm()

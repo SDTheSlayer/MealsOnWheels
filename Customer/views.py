@@ -14,64 +14,71 @@ firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
 
+all_list= database.get().each()
+
+data={}
+
+for i in all_list:
+    data.update({i.key():i.val()})
 
 def home(request):
-    vendors = database.child('Vendors').shallow().get().val()
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
+    vendors = data['Vendors']
     ven_list = {}
     for i in vendors:
-        addr = database.child('Vendors').child(i).child('address').get().val()
-        ctime = database.child('Vendors').child(i).child('closingTime').get().val()
-        email = database.child('Vendors').child(i).child('email').get().val()
-        name = database.child('Vendors').child(i).child('name').get().val()
-        otime = database.child('Vendors').child(i).child('openingTime').get().val()
-        phone = database.child('Vendors').child(i).child('phone').get().val()
-        _type = database.child('Vendors').child(i).child('rtype').get().val()
+        cur=vendors[i]
+        addr = cur['address']
+        ctime = cur['closingTime']
+        email =cur['email']
+        name = cur['name']
+        otime =  cur['openingTime']
+        phone = cur['phone']
+        _type =cur['type']
         d = dict({'Address': addr, 'ClosingTime': ctime, 'Email': email, 'OpeningTime': otime, 'phone': phone,
                   'Type': _type})
-
-        # print(d)
         ven_list.update({name: d})
-    # print(ven_list)
     return render(request, 'Customer/custhome.html', {'ven_list': ven_list})
 
 
 def rest_view(request):
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
     restname = request.POST.get('restaurant')
     main = {}
     dessert = {}
     bev = {}
-    vendors = database.child('Vendors').shallow().get().val()
+    vendors = data['Vendors']
     for i in vendors:
-        if database.child('Vendors').child(i).child('name').get().val() == restname:
+        if vendors[i]['name'] == restname:
             uid = i
             break
-
-    if uid in database.child('Menus').shallow().get().val():
-        for i in database.child('Menus').child(uid).child("Main Course").shallow().get().val():
-            c={}
-            for j in database.child('Menus').child(uid).child("Main Course").child(i).get().each():
-                c.update({j.key(): j.val()})
-            main.update({i: c})
-        for i in database.child('Menus').child(uid).child("Dessert").shallow().get().val():
-            c = {}
-            for j in database.child('Menus').child(uid).child("Dessert").child(i).get().each():
-                c.update({j.key(): j.val()})
-            dessert.update({i: c})
-        for i in database.child('Menus').child(uid).child("Beverages").shallow().get().val():
-            c = {}
-            for j in database.child('Menus').child(uid).child("Beverages").child(i).get().each():
-                c.update({j.key(): j.val()})
-            bev.update({i: c})
-
-    return render(request, 'Customer/restaurant_view.html',{'Main_Course': main, 'Beverages': bev, "Dessert":dessert })
+    menu=data['Menus']
+    if uid in menu:
+        restmenu=menu[uid]
+        main=restmenu["Main Course"]
+        dessert=restmenu["Dessert"]
+        bev=restmenu["Beverages"]
+    return render(request, 'Customer/restaurant_view.html', {'Main_Course': main, 'Beverages': bev, "Dessert": dessert,
+                                                             "uid": uid})
 
 
 def profile_view(request):
-    for i in database.child("Users").shallow().get().val():
-        if database.child("Users").child(i).child("email").get().val() == request.user.email:
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
+    users = data['Users']
+    for i in users:
+        curuser= users[i]
+        if curuser['email'] == request.user.email:
             uid = i
-            curaddress = database.child("Users").child(i).child("deliveryAddress").get().val()
-            curphone = database.child("Users").child(i).child("phone").get().val()
+            curaddress = curuser['deliveryAddress']
+            curphone = curuser['phone']
             break
     if request.method == 'POST':
         form = ProfileForm(request.POST)
@@ -81,9 +88,33 @@ def profile_view(request):
             address = form.cleaned_data.get('address')
             phone_number = form.cleaned_data.get('phone_number')
             name = first_name + " " + last_name
-            data = {"deliveryAddress": address, "email": request.user.email, "name": name, "phone": phone_number}
-            database.child("Users").child(uid).update(data)
+            newdata = {"deliveryAddress": address, "email": request.user.email, "name": name, "phone": phone_number}
+            database.child("Users").child(uid).update(newdata)
             return redirect('Customer:home')
     else:
         form = ProfileForm(initial={"address": curaddress, "phone_number": curphone})
     return render(request, 'Customer/profile.html', {'form': form})
+
+
+def cart_view(request):
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
+    restid=request.POST.get('restaurant')
+    order= {}
+    total = 0
+    restmenu=data['Menus'][restid]
+    for j in {'Main Course','Dessert','Beverages'}:
+        for i in restmenu[j]:
+            item = restmenu[j][i]
+            quantity = request.POST.get(i)
+            quantity=int(quantity)
+            if quantity > 0:
+                price = item['price']
+                price = int(price)
+                item = dict({"quantity":quantity,"price":price})
+                order.update({i:item})
+                total=total+price*quantity
+
+    return render(request, 'Customer/cart.html',{"order":order, "restid":restid, "total":total})
