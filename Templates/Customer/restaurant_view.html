@@ -7,8 +7,40 @@
 <body>
     Home! <a href="{% url 'Authentication:logout' %}">Logout</a>
     <p class="display-4">Hello, {{ user.first_name }} {{ user.last_name }} </p>
-Vendor's list
+Menu
 <br><br>
-{{ foo }}
+    Main Course : <br> <br>
+{% for i,j in Main_Course.items %}
+
+    {{ i }}
+    <br><p>
+    {% for k,l in j.items %}
+        {{ k }} : {{ l }}
+    <br>
+    {% endfor %}
+    </p><br>
+{% endfor %}
+        Beverages : <br><br>
+{% for i,j in Beverages.items %}
+
+    {{ i }}
+    <br><p>
+    {% for k,l in j.items %}
+        {{ k }} : {{ l }}
+    <br>
+    {% endfor %}
+    </p><br>
+{% endfor %}
+       Dessert : <br><br>
+{% for i,j in Dessert.items %}
+
+    {{ i }}
+    <br><p>
+    {% for k,l in j.items %}
+        {{ k }} : {{ l }}
+    <br>
+    {% endfor %}
+    </p><br>
+{% endfor %}
 </body>
 </html>

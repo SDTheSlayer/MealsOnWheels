@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponseRedirect
-
+from .forms import ProfileForm
 import pyrebase
 
 config = {
@@ -25,9 +25,10 @@ def home(request):
         name = database.child('Vendors').child(i).child('name').get().val()
         otime = database.child('Vendors').child(i).child('openingTime').get().val()
         phone = database.child('Vendors').child(i).child('phone').get().val()
-        _type = database.child('Vendors').child(i).child('type').get().val()
+        _type = database.child('Vendors').child(i).child('rtype').get().val()
         d = dict({'Address': addr, 'ClosingTime': ctime, 'Email': email, 'OpeningTime': otime, 'phone': phone,
                   'Type': _type})
+
         # print(d)
         ven_list.update({name: d})
     # print(ven_list)
@@ -47,9 +48,42 @@ def rest_view(request):
 
     if uid in database.child('Menus').shallow().get().val():
         for i in database.child('Menus').child(uid).child("Main Course").shallow().get().val():
-            c = dict({'ingredients': database.child('Menus').child(uid).child("Main Course").child(i).child("ingredients").get().val(),
-                      'isSpicy': database.child('Menus').child(uid).child("Main Course").child(i).child("isSpicy").get().val(),
-                      'price': database.child('Menus').child(uid).child("Main Course").child(i).child("price").get().val()})
+            c={}
+            for j in database.child('Menus').child(uid).child("Main Course").child(i).get().each():
+                c.update({j.key(): j.val()})
             main.update({i: c})
-        print(main)
-    return render(request, 'Customer/restaurant_view.html')
+        for i in database.child('Menus').child(uid).child("Dessert").shallow().get().val():
+            c = {}
+            for j in database.child('Menus').child(uid).child("Dessert").child(i).get().each():
+                c.update({j.key(): j.val()})
+            dessert.update({i: c})
+        for i in database.child('Menus').child(uid).child("Beverages").shallow().get().val():
+            c = {}
+            for j in database.child('Menus').child(uid).child("Beverages").child(i).get().each():
+                c.update({j.key(): j.val()})
+            bev.update({i: c})
+
+    return render(request, 'Customer/restaurant_view.html',{'Main_Course': main, 'Beverages': bev, "Dessert":dessert })
+
+
+def profile_view(request):
+    for i in database.child("Users").shallow().get().val():
+        if database.child("Users").child(i).child("email").get().val() == request.user.email:
+            uid = i
+            curaddress = database.child("Users").child(i).child("deliveryAddress").get().val()
+            curphone = database.child("Users").child(i).child("phone").get().val()
+            break
+    if request.method == 'POST':
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            first_name = request.user.first_name
+            last_name = request.user.last_name
+            address = form.cleaned_data.get('address')
+            phone_number = form.cleaned_data.get('phone_number')
+            name = first_name + " " + last_name
+            data = {"deliveryAddress": address, "email": request.user.email, "name": name, "phone": phone_number}
+            database.child("Users").child(uid).update(data)
+            return redirect('Customer:home')
+    else:
+        form = ProfileForm(initial={"address": curaddress, "phone_number": curphone})
+    return render(request, 'Customer/profile.html', {'form': form})
