@@ -59,7 +59,7 @@ def home(request):
 
         delivery = data['Deliverers']
         for i in delivery:
-            curemail = Deliverers[i]['email']
+            curemail = delivery[i]['email']
             if curemail == request.user.email:
                 return render(request, 'Authentication/home.html', {'usertype': 'Delivery'})
 
@@ -77,7 +77,7 @@ def signup(request):
             address_line1 = form.cleaned_data.get('address_line1')
             city = form.cleaned_data.get('city')
             phone_number = form.cleaned_data.get('phone_number')
-            address = address_line1 + ", " + city
+            address = address_line1 + "," + city
             name = first_name + " " + last_name
             newdata = {"deliveryAddress": address, "email": request.user.email, "name": name, "phone": phone_number}
             database.child("Users").push(newdata)

@@ -51,5 +51,19 @@ Menu
 {% endfor %}
  <input type="submit" value="Add To Cart" name="cart">
  </form>
+
+Reviews:
+{% for i,j in reviews.items %}
+        <br><p>
+    {% for k,l in j.items %}
+         {{ l }} Stars
+        <br>
+        {{ k }}
+    <br>
+    {% endfor %}
+    <br>
+    </p><br>
+{% endfor %}
+
 </body>
 </html>

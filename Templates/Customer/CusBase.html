@@ -1,10 +1,13 @@
+
 {% load static %}
+
 <!DOCTYPE HTML>
 <!--
 	Aesthetic by gettemplates.co
 	Twitter: http://twitter.com/gettemplateco
 	URL: http://gettemplates.co
 -->
+
 <html>
 	<head>
 	<meta charset="utf-8">
@@ -53,10 +56,20 @@
 	<!-- Modernizr JS -->
 	<script src="{% static 'js/modernizr-2.6.2.min.js' %}"></script>
 	<!-- FOR IE9 below -->
-	<!--[if lt IE 9]>
+	<!--[if lt IE 9]>-->
 	<script src="{% static 'js/respond.min.js' %}"></script>
-	<![endif]-->
+    <style>
+        input[type=submit]{
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 16px 32px;
 
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+    </style>
+	<![endif]-->
 	</head>
 	<body>
 
@@ -71,84 +84,38 @@
 
 			<div class="row">
 				<div class="col-sm-4 col-xs-12">
-					<div id="gtco-logo">
-					<span class="icon">
+                   <div id="gtco-logo"> <span class="icon">
 							<i class="ti-truck"></i>
-					</span><a href="index.html">Meals On Wheels<em>.</em></a></div>
+					</span><a href="{% url 'Customer:home' %}">Meals On Wheels <em>.</em></a></div>
+				</div>
+				<div class="col-xs-8 text-right menu-1">
+					<ul>
+                        <li><a href="{% url 'Customer:home' %}">Home</a></li>
+						<li><a href="{% url 'Customer:profile' %}">Profile</a></li>
+						<li class="has-dropdown">
+							<a href="#">Services</a>
+							<ul class="dropdown">
+								<li><a href="#">Food Catering</a></li>
+								<li><a href="#">Wedding Celebration</a></li>
+								<li><a href="#">Birthday's Celebration</a></li>
+							</ul>
+						</li>
+						<li><a href="#">Contact</a></li>
+
+{#                        LOGOUT BUTTON#}
+                        <li class="btn-cta"><a href="{% url 'Authentication:logout' %}"><span>Logout</span></a></li>
+{#						<li class="btn-cta"><a href="{% url 'Customer:cart' %}"><span>Cart</span></a></li>#}
+					</ul>
 				</div>
 			</div>
 
 		</div>
 	</nav>
-    <header id="gtco-header" class="gtco-cover gtco-cover-xs" role="banner" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
-		<div class="overlay"></div>
-		<div class="gtco-container">
-			<div class="row">
-				<div class="col-md-12 col-md-offset-0 text-left">
+    {% block content %}
 
+    {% endblock %}
 
-					<div class="row row-pb-md">
-						<div class="col-md-7 mt-text animate-box" data-animate-effect="fadeInUp">
-                              {% if user.is_authenticated %}
-                          <h2><span class="intro-text-small" style="font-weight: bold">Hello, <a href={% url 'Customer:profile' %} target="_blank">{{ user.first_name }} {{ user.last_name }}</a>
-                          <br>Email : {{ user.email }}<br></span>
-                            <br></h2>
-
-                        {% else %}
-                            #if customer is not logged in, give login button
-                          <a class="lead" href="{% url 'Authentication:login' %}"><input type="button" class="btn btn-primary btn-block" value="Login!"></a>
-	                    {% endif %}
-							<span class="intro-text-small">New <a href="" target="_blank">User?</a></span>
-							<h1 class="cursive-font">Sign up below!</h1>
-
-                            <br><br><br><br><br><br><br>
-
-                                    <div class="intro-text-small col-md-12 col-md-offset-10 text-right">username has been taken as your eamil-id</div>
-
-						</div>
-
-						<div class="col-md-4 col-md-push-1 animate-box" data-animate-effect="fadeInRight">
-
-						</div>
-					</div>
-
-
-				</div>
-
-			</div>
-		</div>
-	</header>
-
-<div class="col-md-12 col-md-offset-4">
-    <br><br>
-        <div class="container">
-			<div class="register">
-				 <div class="register-top-grid">
-					  <form method="post">
-					    {% csrf_token %}
-					    {% for field in form %}
-					      <p>
-					        {{ field.label_tag }}<br>
-					        {{ field }}
-					        {% if field.help_text %}
-					          <small style="color: grey">{{ field.help_text }}</small>
-					        {% endif %}
-					        {% for error in field.errors %}
-					          <p style="color: red">{{ error }}</p>
-					        {% endfor %}
-					      </p>
-					    {% endfor %}
-					    <input type="submit" class="btn-group-sm btn btn-outline btn-primary" value="Sign up!">
-					  </form>
-					 </div>
-					 </div>
-				 </div>
-<br><br>
-</div>
-
-
-
-<footer id="gtco-footer" role="contentinfo" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
+	<footer id="gtco-footer" role="contentinfo" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
 		<div class="overlay"></div>
 		<div class="gtco-container">
 			<div class="row row-pb-md">
@@ -175,9 +142,6 @@
 						</ul>
 					</div>
 				</div>
-
-
-			</div>
 
 
 

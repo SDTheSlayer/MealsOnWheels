@@ -66,8 +66,17 @@ def rest_view(request):
         main = restmenu["Main Course"]
         dessert = restmenu["Dessert"]
         bev = restmenu["Beverages"]
+    review={}
+    allreviews=data['Reviews']
+    s = 0
+    for i in allreviews:
+        if allreviews[i]['vendor']==uid:
+            review.update({s:{allreviews[i]['review']:allreviews[i]['rating']}})
+            print(allreviews[i]['review'])
+            s=s+1
+
     return render(request, 'Customer/restaurant_view.html', {'Main_Course': main, 'Beverages': bev, "Dessert": dessert,
-                                                             "uid": uid})
+                                                             "uid": uid,'reviews':review})
 
 
 def profile_view(request):
@@ -80,7 +89,9 @@ def profile_view(request):
         curuser = users[i]
         if curuser['email'] == request.user.email:
             uid = i
-            curaddress = curuser['deliveryAddress']
+            curaddress = curuser['deliveryAddress'].split(',')[0:-1]
+            curcity = curuser['deliveryAddress'].split(',')[-1]
+            curaddress=','.join(curaddress)
             curphone = curuser['phone']
             break
     if request.method == 'POST':
@@ -89,13 +100,15 @@ def profile_view(request):
             first_name = request.user.first_name
             last_name = request.user.last_name
             address = form.cleaned_data.get('address')
+            city = form.cleaned_data.get('city')
             phone_number = form.cleaned_data.get('phone_number')
             name = first_name + " " + last_name
-            newdata = {"deliveryAddress": address, "email": request.user.email, "name": name, "phone": phone_number}
+            addressfull = address + "," + city
+            newdata = {"deliveryAddress": addressfull, "email": request.user.email, "name": name, "phone": phone_number}
             database.child("Users").child(uid).update(newdata)
             return redirect('Customer:home')
     else:
-        form = ProfileForm(initial={"address": curaddress, "phone_number": curphone})
+        form = ProfileForm(initial={"address": curaddress, 'city': curcity, "phone_number": curphone})
     return render(request, 'Customer/profile.html', {'form': form})
 
 
