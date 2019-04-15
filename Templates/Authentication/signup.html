@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+        username has been taken as your eamil-id
+        <div class="container">
+			<div class="register">
+				 <div class="register-top-grid">
+					  <h2>SIGN UP</h2>
+					  <form method="post">
+					    {% csrf_token %}
+					    {% for field in form %}
+					      <p>
+					        {{ field.label_tag }}<br>
+					        {{ field }}
+					        {% if field.help_text %}
+					          <small style="color: grey">{{ field.help_text }}</small>
+					        {% endif %}
+					        {% for error in field.errors %}
+					          <p style="color: red">{{ error }}</p>
+					        {% endfor %}
+					      </p>
+					    {% endfor %}
+					    <button type="submit">Sign up</button>
+					  </form>
+					 </div>
+					 </div>
+				 </div>
+</body>
+</html>

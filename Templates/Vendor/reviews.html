@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reviews</title>
+</head>
+<body>
+    Hello There!<br><br>
+    <div style="color: goldenrod;">
+        {% for review in reviews_list %}
+            {{ review.rating }}<br>
+            {{ review.review }}<br><br>
+        {% endfor %}
+    </div>
+</body>
+</html>

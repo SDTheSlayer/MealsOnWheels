@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'social_django',
+    'Vendor.apps.VendorConfig',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +56,7 @@ ROOT_URLCONF = 'MealOnWheels.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['Templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'Templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -138,5 +139,5 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '755544742392-sgr2arvnreeqkhg33inmb2e8t2lej0l7.a
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '9zgEqS2HRaYWq4n102z9QeUM'
 
 LOGIN_URL = 'Authentication:login'
-LOGIN_REDIRECT_URL = 'Authentication:home'
-LOGOUT_REDIRECT_URL = 'Authentication:home'
+LOGIN_REDIRECT_URL = 'Authentication:post_login'
+LOGOUT_REDIRECT_URL = 'Authentication:login'
