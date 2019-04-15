@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vendor</title>
+</head>
+<body>
+    Hello there!
+    <br>
+    <br>
+    {{ address }}
+    <br>
+    {{ closingTime }}
+    <br>
+    {{ email }}
+    <br>
+    {{ name }}
+    <br>
+    {{ openingTime }}
+    <br>
+    {{ phone }}
+    <br>
+    {{ type }}
+    <br>
+    {{ rating }}
+    <br>
+    <br>
+    <a href="{% url 'Vendor:edit_details' %}">Edit Details</a>
+    <br>
+    <a href="{% url 'Vendor:menu' %}">See Menu</a>
+    <br>
+    <a href="{% url 'Vendor:curr_orders' %}">Current Orders</a>
+    <br>
+    <a href="{% url 'Vendor:reviews' %}">Reviews</a>
+</body>
+</html>

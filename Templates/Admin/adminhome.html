@@ -107,6 +107,12 @@
           padding: 0;
           margin: 0;
         }
+        #myUL2 {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+        }
+
 
 
         /* Style the tab */
@@ -238,7 +244,7 @@
             <ul id="myUL">
                 {% for i,j in ven_list.items %}
                     <li > <span  hidden>{{ i }}</span>
-                 <form method="POST" action="{% url 'Customer:restaurant' %}">
+                 <form method="POST" action="{% url 'Admin:home' %}">
                     {% csrf_token %}
 				    <div class="col-lg-4 col-md-4 col-sm-6">
 
@@ -282,7 +288,7 @@
             <ul id="myUL2">
                 {% for i,j in deliverylist.items %}
                     <li > <span  hidden>{{ i }}</span>
-                 <form method="POST" action="{% url 'Customer:restaurant' %}">
+                 <form method="POST" action="{% url 'Admin:delivererprofile' %}">
                     {% csrf_token %}
 				    <div class="col-lg-4 col-md-4 col-sm-6">
 
@@ -295,7 +301,7 @@
 						</figure>
 						<div class="fh5co-text">
 
-							<h2><input type="submit" class="btn-cta cursive-font" value="{{ i }}" name="restaurant"></h2>
+							<h2><input type="submit" class="btn-cta cursive-font" value="{{ i  }}" name="deliverer"></h2>
 
                             <span class="intro-text-small">
 							<p>

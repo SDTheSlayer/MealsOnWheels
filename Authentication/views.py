@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.contrib.auth import login, logout
 from .forms import SignUpForm
 import pyrebase
+import Vendor.views
 
 config = {
     'apiKey': "AIzaSyC6MLEYIZxv7DHhs-vtmCB3rLkd1y2r3bI",
@@ -57,7 +58,7 @@ def home(request):
         for i in vendors:
             curemail = vendors[i]['email']
             if curemail == request.user.email:
-                return render(request, 'Authentication/home.html', {'usertype': 'Vendor'})
+                return Vendor.views.home(request, i)
 
         delivery = data['Deliverers']
         for i in delivery:

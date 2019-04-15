@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu</title>
+</head>
+<body>
+    Menu Page!
+    <br><br>
+    <div style="color: #666666; font-weight: 800">
+        {% for category,subcategorywise_dict in categorywise_dict.items %}
+            {{ category }}<br>
+            <div style="margin-left: 60px; color: #5b80b2">
+                {% for item_name,item_properties in subcategorywise_dict.items %}
+                    {{ item_name }}<br>
+                    <div style="margin-left: 30px; color: #19865C">
+                        {% for item_property_name,item_property_value in item_properties.items %}
+                            {{ item_property_name }} : {{ item_property_value }}<br>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button onclick="add_item()">Add Item</button>
+
+        <div id="add_item_id" style="display: None;">
+
+            <form action="{% url 'Vendor:post_menu' %}" method="POST">
+
+                {% csrf_token %}
+                <input type="hidden" value="existing" id="flag" name="category">
+                <div id="existing_category_input">
+                    <label>
+                        <select id="category_select" name="category_select">
+                            <option disabled selected value> -- select an option -- </option>
+                            {% for category in categorywise_dict %}
+                                <option value="{{ category }}">{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                </div>
+                <div id="new_category_input" style="display: None;">
+                    <label>
+                        <input id="category_input" name="category_input">
+                    </label>
+                </div>
+                <button id="existing_category_btn" onclick="toggle_category()" style="display: None;">Existing Category</button>
+                <button id="new_category_btn" onclick="toggle_category()">New Category</button>
+                <br>
+                Item Name:
+                <label>
+                    <input required name="item">
+                </label>
+                <br>
+                <div style="margin-left: 40px;">
+                    Ingredients:
+                    <label>
+                        <input name="ingredients">
+                    </label>
+                    <br>
+                    Mark:
+                    <label>
+                        <input name="mark">
+                    </label>
+                    <br>
+                    Price:
+                    <label>
+                        <input required name="price">
+                    </label>
+                    <br>
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        function add_item() {
+            const x = document.getElementById("add_item_id");
+            if(x.style.display === "none"){
+                x.style.display = "block" ;
+            }
+            else{
+                x.style.display = "none";
+            }
+        }
+        function msgbox(msg) {
+            alert(msg + ' has been added successfully!')
+        }
+        function toggle_category() {
+            const a = document.getElementById("existing_category_input");
+            const b = document.getElementById("existing_category_btn");
+            const c = document.getElementById("new_category_input");
+            const d = document.getElementById("new_category_btn");
+
+            const category = document.getElementById("flag").value;
+            if(category === 'existing'){
+                document.getElementById("flag").value = 'new';
+            }
+            else{
+                document.getElementById("flag").value = 'existing';
+            }
+
+            document.getElementById('category_input').value = "" ;
+            document.getElementById('category_select').selectedIndex = 0 ;
+
+            if(a.style.display === "none"){
+                a.style.display = "block" ;
+            }
+            else{
+                a.style.display = "none";
+            }
+
+            if(b.style.display === "none"){
+                b.style.display = "block" ;
+            }
+            else{
+                b.style.display = "none";
+            }
+
+            if(c.style.display === "none"){
+                c.style.display = "block" ;
+            }
+            else{
+                c.style.display = "none";
+            }
+
+            if(d.style.display === "none"){
+                d.style.display = "block" ;
+            }
+            else{
+                d.style.display = "none";
+            }
+        {#  TODO: Testing and Validation  #}
+        }
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, HttpResponseRedirect
 import pyrebase
+from .forms import delivererform
 
 config = {
     'apiKey': "AIzaSyC6MLEYIZxv7DHhs-vtmCB3rLkd1y2r3bI",
@@ -54,5 +55,47 @@ def home(request):
         deliverylist.update({name: d})
     return render(request, 'Admin/adminhome.html', {'ven_list': ven_list,'deliverylist':deliverylist})
 
-def vendorprofile(request):
-    return render(request, 'Admin/vendorprofile.html')
+def delivererprofile(request):
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
+
+    name = request.POST.get('deliverer')
+    deliverers = data['Deliverers']
+    for i in deliverers:
+        if deliverers[i]['name'] == name:
+            uid = i
+            break
+    deliver=deliverers[uid]
+    curaddress = deliver['address'].split(',')[0:-1]
+    curcity = deliver['address'].split(',')[-1]
+    curaddress = ','.join(curaddress)
+    curphone = deliver['phone']
+    email=deliver['email']
+    form = delivererform(initial={"address_line1": curaddress, 'city': curcity, "phone_number": curphone})
+    return render(request, 'Admin/delivererprofile.html',{'form': form,'name':name,'email':email})
+
+
+def post_delivererprofile(request):
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
+
+    name = request.GET.get('name')
+    deliverers = data['Deliverers']
+    for i in deliverers:
+        if deliverers[i]['name'] == name:
+            uid = i
+            break
+    email = deliverers[uid]['email']
+    form = delivererform(request.POST)
+    if form.is_valid():
+        address = form.cleaned_data.get('address_line1')
+        city = form.cleaned_data.get('city')
+        phone_number = form.cleaned_data.get('phone_number')
+        addressfull = address + "," + city
+        newdata = {"address": addressfull, "email": email, "name": name, "phone": phone_number}
+        database.child("Deliverers").child(uid).update(newdata)
+        return redirect('Admin:home')
