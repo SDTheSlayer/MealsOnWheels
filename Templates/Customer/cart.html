@@ -1,0 +1,60 @@
+{% extends 'Customer/CusBase.html' %}
+{% load static %}
+{% block content %}
+    <script type='text/javascript'>
+        function GetMap() {
+            var map = new Microsoft.Maps.Map('#myMap', {
+                credentials:'ArQm8xOmwjqUgQPxLjEhNC4IYi1IC_1xmg3qhqPygrszIk-RLEB6wfir6-7m1kBO'
+            });
+            var center = map.getCenter();
+            //Add a green pushpin that has dragging enabled and events attached to it.
+            var bluePin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(center.latitude, center.longitude), { color: '#00f', draggable: true });
+            map.entities.push(bluePin);
+            Microsoft.Maps.Events.addHandler(bluePin, 'drag', function (e) { highlight('pushpinDrag', e); });
+            Microsoft.Maps.Events.addHandler(bluePin, 'dragend', function (e) { highlight('pushpinDragEnd', e); });
+            Microsoft.Maps.Events.addHandler(bluePin, 'dragstart', function (e) { highlight('pushpinDragStart', e); });
+        }
+        function highlight(id, event) {
+            //Highlight the mouse event div to indicate that the event has fired.
+            document.getElementById('pinlongitude').value = event.target.getLocation().longitude;
+            document.getElementById('pinlatitude').value = event.target.getLocation().latitude;
+        }
+    </script>
+    <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap' async defer></script>
+
+
+
+    <header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+        <br><br><br><br>
+    <div class="gtco-container">
+        <div class="col-md-12 col-md-offset-0 text-center">
+        <div class="animate-box" data-animate-effect="fadeInUp">
+            <h2 class="cursive-font"><span class="icon">
+							<i class="ti-shopping-cart icon"></i>
+					</span>Order Summary:</h2>
+
+                    <span class="intro-text-small" style="font-weight: bold">{{ restname }}</span><br><br>
+                {% for i,j in order.items %}
+
+                    <span style="font-style: inherit;color: #f0ad4e">{{ i }}</span>
+                    <br><p>
+                    {% for k,l in j.items %}
+                        {{ k }} : {{ l }}
+                    <br>
+                    {% endfor %}
+                    </p><br>
+                {% endfor %}
+
+            <span style="color: #ffffff;font-weight: bolder;font-style: initial">Total : {{ total }}</span>
+            {#                        <input type="hidden" value="0"  name="pinlongitude" id="pinlongitude">#}
+            {#                          <input type="hidden" value="0"  name="pinlatitude" id="pinlatitude">#}
+        <div id="myMap" style="position:relative;width:600px;height:400px;"></div>
+                </div>
+        </div>
+    </div>
+</header>
+
+
+
+{% endblock %}

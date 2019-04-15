@@ -7,12 +7,10 @@ class SignUpForm(UserCreationForm):
         super(SignUpForm, self).__init__(*args, **kargs)
         del self.fields['password2']
         del self.fields['password1']
-    first_name = forms.CharField(max_length=30, required=False)
-    last_name = forms.CharField(max_length=30, required=False)
     address_line1 = forms.CharField(max_length=250, required=False)
     city = forms.CharField(max_length=30, required=False, help_text='State assumed to be Assam')
     phone_number = forms.RegexField(regex=r'^\d{10}$',help_text="Phone number must be 10 digits.(+91 not required)")
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name','address_line1','city')
+        fields = ('address_line1','city')
