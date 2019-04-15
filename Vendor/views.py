@@ -94,7 +94,6 @@ def post_menu(request):
 
 	if request.method == 'POST':
 		category = request.POST.get('category')
-		print(category)
 		if category == 'new':
 			category_name = request.POST.get('category_input')
 		elif category == 'existing':
@@ -107,8 +106,11 @@ def post_menu(request):
 		mark = request.POST.get('mark')
 		price = request.POST.get('price')
 		dict_item_properties = {'ingredients': ingredients, 'mark': mark, 'price': price}
-		dict_item = {item_name: dict_item_properties}
 
-		database.child('Menus').child(curr_vendor).child(category_name).set(dict_item)
+		if category == 'new':
+			dict_item = {item_name: dict_item_properties}
+			database.child('Menus').child(curr_vendor).child(category_name).set(dict_item)
+		elif category == 'existing':
+			database.child('Menus').child(curr_vendor).child(category_name).child(item_name).set(dict_item_properties)
 		return redirect('Vendor:menu')
 	return redirect('Vendor:reviews')
