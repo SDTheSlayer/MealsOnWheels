@@ -15,16 +15,16 @@ firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
 
-all_list= database.get().each()
+all_list = database.get().each()
 
-data={}
+data = {}
 
 for i in all_list:
-    data.update({i.key():i.val()})
+    data.update({i.key(): i.val()})
+
 
 # Create your views here.
 def login_page(request):
-
     if request.user.is_authenticated:
         redirect('Authentication:home')
     return render(request, 'Authentication/login_page.html')
@@ -45,6 +45,8 @@ def home(request):
     for i in all_list:
         data.update({i.key(): i.val()})
     if request.user.is_authenticated:
+        if request.user.email == "mealsonwheelsiitg@gmail.com":
+            return redirect('Admin:home')
         customers = data['Users']
         for i in customers:
             curemail = customers[i]['email']

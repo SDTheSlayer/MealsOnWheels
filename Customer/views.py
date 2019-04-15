@@ -63,9 +63,6 @@ def rest_view(request):
     menu = data['Menus']
     if uid in menu:
         restmenu = menu[uid]
-        main = restmenu["Main Course"]
-        dessert = restmenu["Dessert"]
-        bev = restmenu["Beverages"]
     review={}
     allreviews=data['Reviews']
     s = 0
@@ -75,8 +72,8 @@ def rest_view(request):
             print(allreviews[i]['review'])
             s=s+1
 
-    return render(request, 'Customer/restaurant_view.html', {'Main_Course': main, 'Beverages': bev, "Dessert": dessert,
-                                                             "uid": uid,'reviews':review})
+    return render(request, 'Customer/restaurant_view.html', {'menu':restmenu,"uid": uid,'reviews':review})
+
 
 
 def profile_view(request):

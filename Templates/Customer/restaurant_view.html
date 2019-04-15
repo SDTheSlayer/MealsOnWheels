@@ -13,41 +13,22 @@ Menu
         {% csrf_token %}
    <input type="hidden" value="{{ uid }}" name="restaurant" >{#{{ i }}#}
 
-    Main Course : <br> <br>
-{% for i,j in Main_Course.items %}
+{% for s,t in menu.items %}
+    {{ s }}:
+    <br><br>
+    {% for i,j in t.items %}
+        {{ i }}
 
-    {{ i }}
-    <input type="number" value="0" min="0" name="{{ i }}">{#{{ i }}#}
-    <br><p>
-    {% for k,l in j.items %}
-        {{ k }} : {{ l }}
-    <br>
-    {% endfor %}
-    </p><br>
-{% endfor %}
-        Beverages : <br><br>
-{% for i,j in Beverages.items %}
+        <input type="number" value="0" min="0" name="{{ i }}">{#{{ i }}#}
+        <br><p>
+        {% for k,l in j.items %}
+            {{ k }} : {{ l }}
+            <br>
+        {% endfor %}
 
-    {{ i }}
-    <input type="number" value="0" min="0" name="{{ i }}">{#{{ i }}#}
-    <br><p>
-    {% for k,l in j.items %}
-        {{ k }} : {{ l }}
-    <br>
-    {% endfor %}
-    </p><br>
-{% endfor %}
-       Dessert : <br><br>
-{% for i,j in Dessert.items %}
+        </p><br>
 
-    {{ i }}
-    <input type="number" value="0" min="0" name="{{ i }}">{#{{ i }}#}
-    <br><p>
-    {% for k,l in j.items %}
-        {{ k }} : {{ l }}
-    <br>
     {% endfor %}
-    </p><br>
 {% endfor %}
  <input type="submit" value="Add To Cart" name="cart">
  </form>
