@@ -27,7 +27,7 @@ for i in all_list:
 # Create your views here.
 def login_page(request):
     if request.user.is_authenticated:
-        redirect('Authentication:home')
+        return redirect('Authentication:home')
     return render(request, 'Authentication/login_page.html')
 
 
@@ -35,7 +35,7 @@ def logout_view(request):
     if request.user.is_authenticated:
         logout(request)
         return redirect('Authentication:login')
-    redirect('Authentication:login')
+    return redirect('Authentication:login')
 
 
 def home(request):

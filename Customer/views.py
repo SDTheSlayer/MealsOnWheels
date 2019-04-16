@@ -55,6 +55,7 @@ def rest_view(request):
     main = {}
     dessert = {}
     bev = {}
+
     vendors = data['Vendors']
     for i in vendors:
         if vendors[i]['name'] == restname:
@@ -63,15 +64,18 @@ def rest_view(request):
     menu = data['Menus']
     if uid in menu:
         restmenu = menu[uid]
-    review={}
-    allreviews=data['Reviews']
-    s = 0
-    for i in allreviews:
-        if allreviews[i]['vendor']==uid:
-            review.update({s:{allreviews[i]['review']:allreviews[i]['rating']}})
-            s=s+1
+        review = {}
+        allreviews = data['Reviews']
+        s = 0
+        for i in allreviews:
+            if allreviews[i]['vendor'] == uid:
+                review.update({s: {allreviews[i]['review']: allreviews[i]['rating']}})
+                s = s + 1
 
-    return render(request, 'Customer/restaurant_view.html', {'menu':restmenu,"uid": uid,'reviews':review,'restname':restname})
+        return render(request, 'Customer/restaurant_view.html',
+                      {'menu': restmenu, "uid": uid, 'reviews': review, 'restname': restname})
+    else:
+       return redirect('Customer:home')
 
 
 
