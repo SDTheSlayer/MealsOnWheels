@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponseRedirect
-from .forms import ProfileForm
+from .forms import ProfileForm, RatingForm
 import pyrebase
 
 config = {
@@ -69,10 +69,9 @@ def rest_view(request):
     for i in allreviews:
         if allreviews[i]['vendor']==uid:
             review.update({s:{allreviews[i]['review']:allreviews[i]['rating']}})
-            print(allreviews[i]['review'])
             s=s+1
 
-    return render(request, 'Customer/restaurant_view.html', {'menu':restmenu,"uid": uid,'reviews':review})
+    return render(request, 'Customer/restaurant_view.html', {'menu':restmenu,"uid": uid,'reviews':review,'restname':restname})
 
 
 
@@ -118,7 +117,7 @@ def cart_view(request):
     order = {}
     total = 0
     restmenu = data['Menus'][restid]
-    for j in {'Main Course', 'Dessert', 'Beverages'}:
+    for j in restmenu:
         for i in restmenu[j]:
             item = restmenu[j][i]
             quantity = request.POST.get(i)
@@ -132,3 +131,60 @@ def cart_view(request):
     transaction = dict({"order": order, "restid": restid, "total": total})
     return render(request, 'Customer/cart.html', {"order": order, "restid": restid, "total": total,
                                                   "restname": data['Vendors'][restid]['name']})
+
+
+def dashboard_view(request):
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
+
+    users = data['Users']
+    all_reviews = data['Reviews']
+    for i in users:
+        cur_user = users[i]
+        if cur_user['email'] == request.user.email:
+            uid = i
+            break
+    if request.method == 'POST':
+        form = RatingForm(request.POST)
+        if form.is_valid():
+            vendor = form.cleaned_data.get('vendor')
+            rating = form.cleaned_data.get('rating')
+            review = form.cleaned_data.get('review')
+            id = form.cleaned_data.get('id')
+            customer = form.cleaned_data.get('customer')
+            curr_rating = float(data['Vendors'][vendor]['rating'])
+            noOfRatings = int(data['Vendors'][vendor]['noOfRatings'])
+            curr_rating = (curr_rating * noOfRatings + int(rating)) / (noOfRatings + 1)
+            noOfRatings = noOfRatings + 1
+            database.child('Vendors').child(vendor).child('rating').set(str(curr_rating))
+            database.child('Vendors').child(vendor).child('noOfRatings').set(str(noOfRatings))
+            newdata = {'customer':customer, 'rating':rating, 'review':review, 'vendor':vendor}
+
+            database.child("Reviews").child(id).set(newdata)
+            return  redirect('Customer:dashboard')
+
+    del_trans = data['Transactions']['delivered']
+
+    trans = {}
+    for j in del_trans:
+        if j is not None:
+            if del_trans[j]['customer'] == uid:
+                date = del_trans[j]['date']
+                itemsOrdered = del_trans[j]['itemsOrdered']
+                customer = del_trans[j]['customer']
+                paymentMode = del_trans[j]['paymentMode']
+                totalAmount = del_trans[j]['totalAmount']
+                vendor = del_trans[j]['vendor']
+                vendor_name = data['Vendors'][vendor]['name']
+                if j in all_reviews.keys():
+                    curr_rating = float(all_reviews[j]['rating'])
+                    curr_review = all_reviews[j]['review']
+                else:
+                    curr_rating = 0
+                    curr_review = "Write your review"
+                c = {'id':j, 'date': date, 'itemsOrdered':itemsOrdered, 'paymentMode':paymentMode, 'totalAmount':totalAmount, 'vendor':vendor, 'vendorname': vendor_name,
+                     'customer': customer, 'rating': curr_rating, 'review': curr_review}
+                trans.update({j: c})
+    return render(request, 'Customer/dashboard.html', {'trans': trans})

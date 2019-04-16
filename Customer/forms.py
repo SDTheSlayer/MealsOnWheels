@@ -15,3 +15,18 @@ class ProfileForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('address','city','phone_number')
+
+class RatingForm(UserCreationForm):
+    def __init__(self, *args, **kargs):
+        super(RatingForm, self).__init__(*args, **kargs)
+        del self.fields['password2']
+        del self.fields['password1']
+    vendor = forms.CharField(max_length=200)
+    id = forms.CharField(max_length=100)
+    rating = forms.CharField(max_length=1)
+    review = forms.CharField(max_length=100)
+    customer = forms.CharField(max_length=100)
+
+    class Meta:
+        model = User
+        fields = ('vendor','review', 'rating', 'id', 'customer')
