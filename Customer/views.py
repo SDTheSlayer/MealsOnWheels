@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponseRedirect
-
+from .forms import ProfileForm
 import pyrebase
 
 config = {
@@ -14,42 +14,120 @@ firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
 
+all_list = database.get().each()
+
+data = {}
+
+for i in all_list:
+    data.update({i.key(): i.val()})
+
 
 def home(request):
-    vendors = database.child('Vendors').shallow().get().val()
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
+    vendors = data['Vendors']
     ven_list = {}
     for i in vendors:
-        addr = database.child('Vendors').child(i).child('address').get().val()
-        ctime = database.child('Vendors').child(i).child('closingTime').get().val()
-        email = database.child('Vendors').child(i).child('email').get().val()
-        name = database.child('Vendors').child(i).child('name').get().val()
-        otime = database.child('Vendors').child(i).child('openingTime').get().val()
-        phone = database.child('Vendors').child(i).child('phone').get().val()
-        _type = database.child('Vendors').child(i).child('type').get().val()
-        d = dict({'Address': addr, 'ClosingTime': ctime, 'Email': email, 'OpeningTime': otime, 'phone': phone,
-                  'Type': _type})
-        # print(d)
+        cur = vendors[i]
+        addr = cur['address']
+        ctime = cur['closingTime']
+        email = cur['email']
+        name = cur['name']
+        otime = cur['openingTime']
+        phone = cur['phone']
+        _type = cur['type']
+        avgprice = cur['avgPrice']
+        time = str(otime) + ":00 - " + str(ctime) + ":00"
+        d = dict({'Address': addr, 'Time': time, 'Email': email, 'phone': phone,
+                  'Type': _type, 'Price': avgprice})
         ven_list.update({name: d})
-    # print(ven_list)
     return render(request, 'Customer/custhome.html', {'ven_list': ven_list})
 
 
 def rest_view(request):
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
     restname = request.POST.get('restaurant')
     main = {}
     dessert = {}
     bev = {}
-    vendors = database.child('Vendors').shallow().get().val()
+    vendors = data['Vendors']
     for i in vendors:
-        if database.child('Vendors').child(i).child('name').get().val() == restname:
+        if vendors[i]['name'] == restname:
             uid = i
             break
+    menu = data['Menus']
+    if uid in menu:
+        restmenu = menu[uid]
+    review={}
+    allreviews=data['Reviews']
+    s = 0
+    for i in allreviews:
+        if allreviews[i]['vendor']==uid:
+            review.update({s:{allreviews[i]['review']:allreviews[i]['rating']}})
+            s=s+1
 
-    if uid in database.child('Menus').shallow().get().val():
-        for i in database.child('Menus').child(uid).child("Main Course").shallow().get().val():
-            c = dict({'ingredients': database.child('Menus').child(uid).child("Main Course").child(i).child("ingredients").get().val(),
-                      'isSpicy': database.child('Menus').child(uid).child("Main Course").child(i).child("isSpicy").get().val(),
-                      'price': database.child('Menus').child(uid).child("Main Course").child(i).child("price").get().val()})
-            main.update({i: c})
-        print(main)
-    return render(request, 'Customer/restaurant_view.html')
+    return render(request, 'Customer/restaurant_view.html', {'menu':restmenu,"uid": uid,'reviews':review})
+
+
+
+def profile_view(request):
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
+    users = data['Users']
+    for i in users:
+        curuser = users[i]
+        if curuser['email'] == request.user.email:
+            uid = i
+            curaddress = curuser['deliveryAddress'].split(',')[0:-1]
+            curcity = curuser['deliveryAddress'].split(',')[-1]
+            curaddress=','.join(curaddress)
+            curphone = curuser['phone']
+            break
+    if request.method == 'POST':
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            first_name = request.user.first_name
+            last_name = request.user.last_name
+            address = form.cleaned_data.get('address')
+            city = form.cleaned_data.get('city')
+            phone_number = form.cleaned_data.get('phone_number')
+            name = first_name + " " + last_name
+            addressfull = address + "," + city
+            newdata = {"deliveryAddress": addressfull, "email": request.user.email, "name": name, "phone": phone_number}
+            database.child("Users").child(uid).update(newdata)
+            return redirect('Customer:home')
+    else:
+        form = ProfileForm(initial={"address": curaddress, 'city': curcity, "phone_number": curphone})
+    return render(request, 'Customer/profile.html', {'form': form})
+
+
+def cart_view(request):
+    all_list = database.get().each()
+    data = {}
+    for i in all_list:
+        data.update({i.key(): i.val()})
+    restid = request.POST.get('restaurant')
+    order = {}
+    total = 0
+    restmenu = data['Menus'][restid]
+    for j in restmenu:
+        for i in restmenu[j]:
+            item = restmenu[j][i]
+            quantity = request.POST.get(i)
+            quantity = int(quantity)
+            if quantity > 0:
+                price = item['price']
+                price = int(price)
+                item = dict({"quantity": quantity, "price": price})
+                order.update({i: item})
+                total = total + price * quantity
+    transaction = dict({"order": order, "restid": restid, "total": total})
+    return render(request, 'Customer/cart.html', {"order": order, "restid": restid, "total": total,
+                                                  "restname": data['Vendors'][restid]['name']})

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.contrib.auth import login, logout
 from .forms import SignUpForm
 import pyrebase
+import Vendor.views
 
 config = {
     'apiKey': "AIzaSyC6MLEYIZxv7DHhs-vtmCB3rLkd1y2r3bI",
@@ -14,6 +15,13 @@ config = {
 firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
+
+all_list = database.get().each()
+
+data = {}
+
+for i in all_list:
+    data.update({i.key(): i.val()})
 
 
 # Create your views here.
@@ -31,22 +39,30 @@ def logout_view(request):
 
 
 def home(request):
+    all_list = database.get().each()
+
+    data = {}
+
+    for i in all_list:
+        data.update({i.key(): i.val()})
     if request.user.is_authenticated:
-        customers = database.child('Users').shallow().get().val()
+        if request.user.email == "mealsonwheelsiitg@gmail.com":
+            return redirect('Admin:home')
+        customers = data['Users']
         for i in customers:
-            curemail = database.child('Users').child(i).child('email').get().val()
+            curemail = customers[i]['email']
             if curemail == request.user.email:
                 return redirect('Customer:home')
 
-        vendors = database.child('Vendors').shallow().get().val()
+        vendors = data['Vendors']
         for i in vendors:
-            curemail = database.child('Vendors').child(i).child('email').get().val()
+            curemail = vendors[i]['email']
             if curemail == request.user.email:
-                return render(request, 'Authentication/home.html', {'usertype': 'Vendor'})
+                return Vendor.views.home(request, i)
 
-        delivery = database.child('Deliverers').shallow().get().val()
+        delivery = data['Deliverers']
         for i in delivery:
-            curemail = database.child('Deliverers').child(i).child('email').get().val()
+            curemail = delivery[i]['email']
             if curemail == request.user.email:
                 return render(request, 'Authentication/home.html', {'usertype': 'Delivery'})
 
@@ -64,10 +80,10 @@ def signup(request):
             address_line1 = form.cleaned_data.get('address_line1')
             city = form.cleaned_data.get('city')
             phone_number = form.cleaned_data.get('phone_number')
-            address = address_line1 + ", " + city
+            address = address_line1 + "," + city
             name = first_name + " " + last_name
-            data = {"deliveryAddress": address, "email": request.user.email, "name": name, "phone": phone_number}
-            database.child("Users").push(data)
+            newdata = {"deliveryAddress": address, "email": request.user.email, "name": name, "phone": phone_number}
+            database.child("Users").push(newdata)
             return redirect('Authentication:home')
     else:
         form = SignUpForm()
