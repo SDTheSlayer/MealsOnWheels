@@ -69,7 +69,6 @@ def rest_view(request):
     for i in allreviews:
         if allreviews[i]['vendor']==uid:
             review.update({s:{allreviews[i]['review']:allreviews[i]['rating']}})
-            print(allreviews[i]['review'])
             s=s+1
 
     return render(request, 'Customer/restaurant_view.html', {'menu':restmenu,"uid": uid,'reviews':review})
@@ -118,7 +117,7 @@ def cart_view(request):
     order = {}
     total = 0
     restmenu = data['Menus'][restid]
-    for j in {'Main Course', 'Dessert', 'Beverages'}:
+    for j in restmenu:
         for i in restmenu[j]:
             item = restmenu[j][i]
             quantity = request.POST.get(i)
