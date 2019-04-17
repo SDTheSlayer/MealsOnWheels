@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, HttpResponseRedirect
 import pyrebase
-from .forms import delivererform
+from .forms import delivererform, adddelivererform
+
 
 config = {
     'apiKey': "AIzaSyC6MLEYIZxv7DHhs-vtmCB3rLkd1y2r3bI",
@@ -20,6 +21,7 @@ data = {}
 
 for i in all_list:
     data.update({i.key(): i.val()})
+
 
 def home(request):
     all_list = database.get().each()
@@ -53,7 +55,8 @@ def home(request):
         phone = cur['phone']
         d = dict({'Address': addr, 'Email': email, 'phone': phone})
         deliverylist.update({name: d})
-    return render(request, 'Admin/adminhome.html', {'ven_list': ven_list,'deliverylist':deliverylist})
+    return render(request, 'Admin/adminhome.html', {'ven_list': ven_list, 'deliverylist': deliverylist})
+
 
 def delivererprofile(request):
     all_list = database.get().each()
@@ -67,14 +70,14 @@ def delivererprofile(request):
         if deliverers[i]['name'] == name:
             uid = i
             break
-    deliver=deliverers[uid]
+    deliver = deliverers[uid]
     curaddress = deliver['address'].split(',')[0:-1]
     curcity = deliver['address'].split(',')[-1]
     curaddress = ','.join(curaddress)
     curphone = deliver['phone']
-    email=deliver['email']
+    email = deliver['email']
     form = delivererform(initial={"address_line1": curaddress, 'city': curcity, "phone_number": curphone})
-    return render(request, 'Admin/delivererprofile.html',{'form': form,'name':name,'email':email})
+    return render(request, 'Admin/delivererprofile.html', {'form': form, 'name': name, 'email': email})
 
 
 def post_delivererprofile(request):
@@ -96,8 +99,32 @@ def post_delivererprofile(request):
         city = form.cleaned_data.get('city')
         phone_number = form.cleaned_data.get('phone_number')
         addressfull = address + "," + city
-        newdata = {"address": addressfull, "email": email, "name": name, "phone": phone_number}
+        newdata = {"address": addressfull, "phone": phone_number}
         database.child("Deliverers").child(uid).update(newdata)
         return redirect('Admin:home')
 
 
+def adddeliverer(request):
+    if request.method == 'POST':
+        all_list = database.child("Deliverers").get().each()
+        deliverers = {}
+        for i in all_list:
+            deliverers.update({i.key(): i.val()})
+
+        form = adddelivererform(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data.get('name')
+            address_line1 = form.cleaned_data.get('address_line1')
+            city = form.cleaned_data.get('city')
+            phone_number = form.cleaned_data.get('phone_number')
+            address = address_line1 + "," + city
+            email = form.cleaned_data.get('email')
+            for i in deliverers:
+                if deliverers[i]['email']==email:
+                    return redirect('Admin:home')
+            newdata = {"address": address, "email": email, 'isFree': "Yes", "name": name, "phone": phone_number}
+            database.child("Deliverers").push(newdata)
+            return redirect('Admin:home')
+    else:
+        form = adddelivererform()
+    return render(request, 'Admin/adddeliverer.html', {'form': form})

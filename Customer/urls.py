@@ -9,4 +9,6 @@ urlpatterns = [
     path('profile', views.profile_view, name='profile'),
     path('cart', views.cart_view, name='cart'),
     path('dashboard', views.dashboard_view, name='dashboard'),
+    path('postcart', views.post_cart, name='postcart'),
+    path('currentorders',views.current_orders,name='currentorders')
 ]

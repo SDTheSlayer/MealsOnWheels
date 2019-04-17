@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, HttpResponseRedirect
 from .forms import ProfileForm, RatingForm
 import pyrebase
+import datetime
+import ast
 
 config = {
     'apiKey': "AIzaSyC6MLEYIZxv7DHhs-vtmCB3rLkd1y2r3bI",
@@ -14,20 +16,12 @@ firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
 
-all_list = database.get().each()
-
-data = {}
-
-for i in all_list:
-    data.update({i.key(): i.val()})
-
 
 def home(request):
-    all_list = database.get().each()
-    data = {}
+    all_list = database.child('Vendors').get().each()
+    vendors = {}
     for i in all_list:
-        data.update({i.key(): i.val()})
-    vendors = data['Vendors']
+        vendors.update({i.key(): i.val()})
     ven_list = {}
     for i in vendors:
         cur = vendors[i]
@@ -75,23 +69,21 @@ def rest_view(request):
         return render(request, 'Customer/restaurant_view.html',
                       {'menu': restmenu, "uid": uid, 'reviews': review, 'restname': restname})
     else:
-       return redirect('Customer:home')
-
+        return redirect('Customer:home')
 
 
 def profile_view(request):
-    all_list = database.get().each()
-    data = {}
+    all_list = database.child('Users').get().each()
+    users = {}
     for i in all_list:
-        data.update({i.key(): i.val()})
-    users = data['Users']
+        users.update({i.key(): i.val()})
     for i in users:
         curuser = users[i]
         if curuser['email'] == request.user.email:
             uid = i
             curaddress = curuser['deliveryAddress'].split(',')[0:-1]
             curcity = curuser['deliveryAddress'].split(',')[-1]
-            curaddress=','.join(curaddress)
+            curaddress = ','.join(curaddress)
             curphone = curuser['phone']
             break
     if request.method == 'POST':
@@ -137,6 +129,59 @@ def cart_view(request):
                                                   "restname": data['Vendors'][restid]['name']})
 
 
+def assignDeliverer():
+    all_list = database.child('Deliverers').get().each()
+    deliverers = {}
+    for i in all_list:
+        deliverers.update({i.key(): i.val()})
+    for i in deliverers:
+        if deliverers[i]['isFree'] == "Yes":
+            database.child('Deliverers').child(i).update({'isFree': "No"})
+            return deliverers[i]['name'], i
+
+    return "No", "No"
+
+
+def post_cart(request):
+    now = datetime.datetime.now()
+    itemsOrdered = ast.literal_eval(request.GET.get('order'))
+    vendor = request.GET.get('restid')
+    vendorName = request.GET.get('restname')
+    totalAmount = request.GET.get('total')
+    paymentMode = request.GET.get('transaction')
+    date = str(now.day) + "/" + str(now.month) + "/" + str(now.year)
+    customerLocation = request.GET.get('pinlatitude') + "," + request.GET.get('pinlongitude')
+    transactionId = "cash"
+    print(itemsOrdered)
+    print(type(itemsOrdered))
+    delivererName, deliverer = assignDeliverer()
+    all_list = database.child('Users').get().each()
+    users = {}
+    for i in all_list:
+        users.update({i.key(): i.val()})
+    for i in users:
+        if users[i]['email'] == request.user.email:
+            customer = i
+    transactiondict = {'customer': customer, 'customerLocation': customerLocation, 'date': date,
+                       'deliverer': deliverer, 'delivererLocation': ",", 'delivererName': delivererName,
+                       'itemsOrdered': itemsOrdered, 'paymentMode': paymentMode, 'totalAmount': totalAmount,
+                       'transactionId': transactionId, 'vendor': vendor, 'status': "Cooking", 'vendorName': vendorName}
+    print(transactiondict)
+
+    if deliverer == "No":
+        return redirect('Customer:home')
+
+    if request.GET.get('transaction') == "paytm":
+        return redirect('Customer:home')
+
+    database.child('Transactions').child('notDelivered').push(transactiondict)
+    return redirect('Customer:home')
+
+
+def current_orders(request):
+    return render(request, 'Customer/current_orders.html')
+
+
 def dashboard_view(request):
     all_list = database.get().each()
     data = {}
@@ -164,10 +209,10 @@ def dashboard_view(request):
             noOfRatings = noOfRatings + 1
             database.child('Vendors').child(vendor).child('rating').set(str(curr_rating))
             database.child('Vendors').child(vendor).child('noOfRatings').set(str(noOfRatings))
-            newdata = {'customer':customer, 'rating':rating, 'review':review, 'vendor':vendor}
+            newdata = {'customer': customer, 'rating': rating, 'review': review, 'vendor': vendor}
 
             database.child("Reviews").child(id).set(newdata)
-            return  redirect('Customer:dashboard')
+            return redirect('Customer:dashboard')
 
     del_trans = data['Transactions']['delivered']
 
@@ -188,7 +233,8 @@ def dashboard_view(request):
                 else:
                     curr_rating = 0
                     curr_review = "Write your review"
-                c = {'id':j, 'date': date, 'itemsOrdered':itemsOrdered, 'paymentMode':paymentMode, 'totalAmount':totalAmount, 'vendor':vendor, 'vendorname': vendor_name,
+                c = {'id': j, 'date': date, 'itemsOrdered': itemsOrdered, 'paymentMode': paymentMode,
+                     'totalAmount': totalAmount, 'vendor': vendor, 'vendorname': vendor_name,
                      'customer': customer, 'rating': curr_rating, 'review': curr_review}
                 trans.update({j: c})
     return render(request, 'Customer/dashboard.html', {'trans': trans})

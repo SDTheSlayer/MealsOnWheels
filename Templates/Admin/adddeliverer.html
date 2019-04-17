@@ -108,9 +108,7 @@
 					<div class="row row-mt-15em">
 						<div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
 {#							<span class="intro-text-small">Desire meets <a href="http://gettemplates.co" target="_blank">new Food</a></span>#}
-                            <h1 class="cursive-font">Update Profile</h1><br>
-                            <h2><span class="intro-text-small" style="font-weight: bold">{{ name }}
-                          <br>Email : {{ email }}<br></span></h2>
+                            <h1 class="cursive-font">Add Deliverer</h1><br>
 						</div>
 
 					</div>
@@ -128,7 +126,7 @@
 			<div class="register">
 				 <div class="register-top-grid">
 
-					  <form method="post" action="{% url 'Admin:post_delivererprofile' %}?name={{ name }}">
+					  <form method="post">
 					    {% csrf_token %}
                             {% for field in form %}
                                    <p>
@@ -143,7 +141,7 @@
                                 </p>
 
                             {% endfor %}
-                            <input type="submit" class="btn btn-outline" value="Update">
+                        <input type="submit" class="btn btn-outline" value="Update">
 					  </form>
 
 					 </div>

@@ -8,5 +8,5 @@ urlpatterns = [
 	# path('vendor/',views.vendorprofile,name='vendorprofile')
 	path('deliverer/',views.delivererprofile,name='delivererprofile'),
 	path('post_deliverer/', views.post_delivererprofile, name='post_delivererprofile'),
-	# path('adddeliverer/',views.adddeliverer,name='adddeliverer'),
+	path('adddeliverer/',views.adddeliverer,name='adddeliverer'),
 ]
