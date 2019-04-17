@@ -1,6 +1,5 @@
 import pyrebase
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseNotFound
 from django.shortcuts import render, redirect, reverse
 
 
@@ -30,6 +29,8 @@ def home(request, curr_vendor):
 			'phone': details['phone'],
 			'type': details['type'],
 			'rating': details['rating'],
+			'avgPrice': details['avgPrice'],
+			'noOfRatings': details['noOfRatings'],
 		}
 		return render(request, 'Vendor/home.html', context)
 	return redirect(reverse('Authentication:login'))
@@ -59,9 +60,9 @@ def curr_orders(request):
 		return render(request, 'Authentication/login.html', error_msg)
 
 	# TODO: change delivered to notDelivered in next 3 lines.
-	not_delivered_orders = database.child('Transactions').child('delivered').shallow().get().val()
-	curr_transactions_list = [database.child('Transactions').child('delivered').child(i).get().val() for i in not_delivered_orders if database.child(
-		'Transactions').child('delivered').child(i).child('vendor').get().val() == curr_vendor]
+	not_delivered_orders = database.child('Transactions').child('notDelivered').shallow().get().val()
+	curr_transactions_list = [database.child('Transactions').child('notDelivered').child(i).get().val() for i in not_delivered_orders if database.child(
+		'Transactions').child('notDelivered').child(i).child('vendor').get().val() == curr_vendor]
 	context = {'curr_transactions_list': curr_transactions_list}
 	return render(request, 'Vendor/curr_orders.html', context)
 
@@ -126,9 +127,8 @@ def edit_details(request):
 		error_msg = {'msg': "You are not a registered Vendor!"}
 		return render(request, 'Authentication/login.html', error_msg)
 
-	# Write code here.
-	# 1) using curr_vendor pass all details in the form of dictionary in context.
-	context = {}
+	vendor_details = database.child('Vendors').child(curr_vendor).get().val()
+	context = {'vendor_details': vendor_details}
 	return render(request, 'Vendor/edit_details.html', context)
 
 
@@ -143,4 +143,17 @@ def post_edit_details(request):
 		return render(request, 'Authentication/login.html', error_msg)
 
 	# 3) Edit in database query
+	avgPrice = request.POST.get('avgPrice')
+	closingTime = request.POST.get('closingTime')
+	openingTime = request.POST.get('openingTime')
+	phone = request.POST.get('phone')
+	type = request.POST.get('type')
+
+	database.child('Vendors').child(curr_vendor).update({
+		'avgPrice': avgPrice,
+		'closingTime': closingTime,
+		'openingTime': openingTime,
+		'phone': phone,
+		'type': type,
+	})
 	return home(request, curr_vendor)

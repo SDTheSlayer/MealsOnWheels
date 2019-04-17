@@ -1,25 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Menu</title>
-</head>
-<body>
-    Menu Page!
+{% extends 'Vendor/vendorBase.html' %}
+{% load static %}
+
+{% block content %}
+<header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
+		<div class="overlay"></div>
+		<div class="gtco-container">
+			<div class="row">
+				<div class="col-md-12 col-md-offset-0 text-center">
+					<div class="row row-mt-15em">
+						<div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
+                        {% if user.is_authenticated %}
+
+                          <span class="intro-text-small">Hello there!</span>
+                            {# Hello, <a href={% url 'Customer:profile' %} target="_blank">{{ user.first_name }} {{ user.last_name }}</a> #}
+                        {% else %}
+                            #if customer is not logged in, give login button
+                          <a class="lead" href="{% url 'Authentication:login' %}"><input type="button" class="btn btn-primary btn-block" value="Login!"></a>
+	                    {% endif %}
+{#							<span class="intro-text-small">Desire meets <a href="http://gettemplates.co" target="_blank">new Food</a></span>#}
+				 			<h1 class="cursive-font">Taste all our delicacies!</h1>
+						</div>
+
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+	</header>
+    <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
+<div class="text-center center-block">
+        <div class="gtco-container text-justify">
+			<div class="register">
+				 <div class="register-top-grid">
+                 <br>
+    <h2><span class="popular-text" style="font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;">MENU</span></h2>
     <br><br>
-    <div style="color: #666666; font-weight: 800">
+    {# <div style="color: #666666; font-weight: 800"> #}
         {% for category,subcategorywise_dict in categorywise_dict.items %}
-            {{ category }}<br>
-            <div style="margin-left: 60px; color: #5b80b2">
+            <h3><span style="color: #f0ad4e;">{{ category }}:</span></h3><br>
+            {# <div style="margin-left: 60px; color: #5b80b2"> #}
                 {% for item_name,item_properties in subcategorywise_dict.items %}
-                    {{ item_name }}<br>
-                    <div style="margin-left: 30px; color: #19865C">
-                        {% for item_property_name,item_property_value in item_properties.items %}
-                            {{ item_property_name }} : {{ item_property_value }}<br>
-                        {% endfor %}
-                    </div>
+                    <p>{{ item_name }}
+                    {# <div style="margin-left: 30px; color: #19865C"> #}
+{#                        {% for item_property_name,item_property_value in item_properties.items %}#}
+{#                            {{ item_property_name }} : {{ item_property_value }}<br>#}
+{#                        {% endfor %} #}
+                    {# </div> #}
+                    {% if item_properties.isSpicy == 'Yes' %}<i class="icon"><img src="{% static 'images/chili-pepper.png' %}">{% endif %}<br>
+                    <span style="float: right">
+                                {% if item_properties.mark == 'Veg' %}
+                                    <i class="icon"><img src="{% static 'images/icon-veg.png' %}">
+                                {% else %}
+                                    <i class="icon"><img src="{% static 'images/icon-non-veg.png' %}">
+                                {% endif %}
+                    </span>
+                    <i class="icon"><img src="{% static 'images/mixing.png' %}"><span class="text-info">&ensp; {{ item_properties.ingredients }}</span></i>
+                    <h3 class="cursive-font" align="right" style="">₹ {{ item_properties.price }}</h3>
+                    </p>
                 {% endfor %}
-            </div>
+            {# </div> #}
         {% endfor %}
 
         <button onclick="add_item()">Add Item</button>
@@ -30,7 +70,7 @@
 
                 {% csrf_token %}
                 <input type="hidden" value="existing" id="flag" name="category">
-                <div id="existing_category_input">
+                 <div id="existing_category_input">
                     <label>
                         <select id="category_select" name="category_select">
                             <option disabled selected value> -- select an option -- </option>
@@ -44,7 +84,7 @@
                     <label>
                         <input id="category_input" name="category_input">
                     </label>
-                </div>
+                  </div>
                 <button id="existing_category_btn" onclick="toggle_category()" style="display: None;">Existing Category</button>
                 <button id="new_category_btn" onclick="toggle_category()">New Category</button>
                 <br>
@@ -53,7 +93,7 @@
                     <input required name="item">
                 </label>
                 <br>
-                <div style="margin-left: 40px;">
+                 <div style="margin-left: 40px;">
                     Ingredients:
                     <label>
                         <input name="ingredients">
@@ -69,10 +109,15 @@
                         <input required name="price">
                     </label>
                     <br>
-                </div>
+                 </div>
                 <button type="submit">Submit</button>
             </form>
+         </div>
+    {# </div> #}
+                 </div>
+            </div>
         </div>
+</div>
     </div>
     <script>
         function add_item() {
@@ -134,5 +179,5 @@
         {#  TODO: Testing and Validation  #}
         }
     </script>
-</body>
-</html>
+
+{% endblock %}

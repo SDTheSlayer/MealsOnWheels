@@ -99,3 +99,5 @@ def post_delivererprofile(request):
         newdata = {"address": addressfull, "email": email, "name": name, "phone": phone_number}
         database.child("Deliverers").child(uid).update(newdata)
         return redirect('Admin:home')
+
+
