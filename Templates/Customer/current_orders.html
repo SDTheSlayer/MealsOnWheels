@@ -1,59 +1,89 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title></title>
-    <meta charset="utf-8" />
-    <script type='text/javascript'>
-        var map;
-        var directionsManager;
-        function GetMap()
-        {
-            map = new Microsoft.Maps.Map('#myMap', {});
-            //Load the directions module.
-            Microsoft.Maps.loadModule('Microsoft.Maps.Directions', function () {
-                //Create an instance of the directions manager.
-                directionsManager = new Microsoft.Maps.Directions.DirectionsManager(map);
-                directionsManager.setRequestOptions({
-                    routeMode: Microsoft.Maps.Directions.RouteMode.driving
-                });
-                //Create waypoints to route between.
-                var seattleWaypoint = new Microsoft.Maps.Directions.Waypoint({ address: 'Seattle, WA' });
-                directionsManager.addWaypoint(seattleWaypoint);
-                var workWaypoint = new Microsoft.Maps.Directions.Waypoint({ address: 'Redmond, WA' });
-                directionsManager.addWaypoint(workWaypoint);
-                //Add event handlers to directions manager.
-                Microsoft.Maps.Events.addHandler(directionsManager, 'directionsError', directionsError);
-                Microsoft.Maps.Events.addHandler(directionsManager, 'directionsUpdated', directionsUpdated);
-                //Calculate directions.
-                directionsManager.calculateDirections();
-            });
-        }
-        function directionsUpdated(e) {
-            //Get the current route index.
-            var routeIdx = directionsManager.getRequestOptions().routeIndex;
-            //Get the distance of the route, rounded to 2 decimal places.
-            var distance = Math.round(e.routeSummary[routeIdx].distance * 100)/100;
-            //Get the distance units used to calculate the route.
-            var units = directionsManager.getRequestOptions().distanceUnit;
-            var distanceUnits = '';
-            if (units == Microsoft.Maps.Directions.DistanceUnit.km) {
-                distanceUnits = 'km'
-            } else {
-                //Must be in miles
-                distanceUnits = 'miles'
-            }
-            //Time is in seconds, convert to minutes and round off.
-            var time = Math.round(e.routeSummary[routeIdx].timeWithTraffic / 60);
-            document.getElementById('routeInfoPanel').innerHTML = 'Distance: ' + distance + ' ' + distanceUnits + '<br/>Time with Traffic: ' + time + ' minutes';
-        }
-        function directionsError(e) {
-            alert('Error: ' + e.message + '\r\nResponse Code: ' + e.responseCode)
-        }
-    </script>
-    <script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=ArQm8xOmwjqUgQPxLjEhNC4IYi1IC_1xmg3qhqPygrszIk-RLEB6wfir6-7m1kBO' async defer></script>
-</head>
-<body>
-    <div id="myMap" style="position:relative;width:800px;height:600px;"></div>
-    <div id='routeInfoPanel'></div>
-</body>
-</html>
+{% extends 'Customer/CusBase.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+hr {
+  display: block;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  margin-left: auto;
+  margin-right: auto;
+  border-style: inset;
+  border-width: 1px;
+}
+</style>
+
+
+        <header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
+		<div class="overlay"></div>
+		<div class="gtco-container">
+			<div class="row">
+				<div class="col-md-12 col-md-offset-0 text-center">
+					<div class="row row-mt-15em">
+						<div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
+                        {% if user.is_authenticated %}
+
+                          <span class="intro-text-small">Hello, <a href={% url 'Customer:profile' %} target="_blank">{{ user.first_name }} {{ user.last_name }}</a></span>
+                        {% else %}
+
+                          <a class="lead" href="{% url 'Authentication:login' %}"><input type="button" class="btn btn-primary btn-block" value="Login!"></a>
+	                    {% endif %}
+{#							<span class="intro-text-small">Desire meets <a href="http://gettemplates.co" target="_blank">new Food</a></span>#}
+						</div>
+
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+	</header>
+
+
+
+<div class="col-md-8 col-md-offset-2 text-center gtco-heading">
+<div class="text-center center-block">
+        <div class="gtco-container text-justify">
+			<div class="register">
+				 <div class="register-top-grid">
+
+                        <br><br>
+
+                         <h2><span class="popular-text" style="font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;">Current Orders</span></h2>
+
+                    {% for s,t in orders.items %}
+                         <hr>
+                        <form method="POST" action="{% url 'Customer:order' %}">
+                            {% csrf_token %}
+                        <input type="hidden" value="{{ s }}" name="restaurant" >{#{{ i }}#}
+                        <h3><span style="color: #f0ad4e;">{{ t.vendorName }}:</span></h3>
+                            <p>
+                             Date : {{ t.date }}
+                            <br>
+                             Deliverer Name : {{ t.delivererName }}
+                            <br>
+                             Payment Mode : {{ t.paymentMode }}
+                            <br>
+                             Total Amount : {{ t.totalAmount }}
+                            <br>
+                             Current Status : {{ t.status }}
+                            <br>
+                            </p>
+                         <input type="submit" class="btn btn-outline" value="Track Order" name="cart"> &ensp;
+                        </form>
+
+                    {% endfor %}
+
+
+
+<br><br>
+
+                 </div>
+            </div>
+        </div>
+</div>
+</div>
+
+{% endblock %}

@@ -152,8 +152,7 @@ def post_cart(request):
     date = str(now.day) + "/" + str(now.month) + "/" + str(now.year)
     customerLocation = request.GET.get('pinlatitude') + "," + request.GET.get('pinlongitude')
     transactionId = "cash"
-    print(itemsOrdered)
-    print(type(itemsOrdered))
+
     delivererName, deliverer = assignDeliverer()
     all_list = database.child('Users').get().each()
     users = {}
@@ -166,7 +165,6 @@ def post_cart(request):
                        'deliverer': deliverer, 'delivererLocation': ",", 'delivererName': delivererName,
                        'itemsOrdered': itemsOrdered, 'paymentMode': paymentMode, 'totalAmount': totalAmount,
                        'transactionId': transactionId, 'vendor': vendor, 'status': "Cooking", 'vendorName': vendorName}
-    print(transactiondict)
 
     if deliverer == "No":
         return redirect('Customer:home')
@@ -179,7 +177,26 @@ def post_cart(request):
 
 
 def current_orders(request):
-    return render(request, 'Customer/current_orders.html')
+    user_list = database.child('Users').get().each()
+    all_list = database.child('Transactions').child('notDelivered').get().each()
+    orders = {}
+    users = {}
+    for i in user_list:
+        users.update({i.key(): i.val()})
+    for i in all_list:
+        data = i.val()
+        if users[data['customer']]['email'] == request.user.email:
+            orders.update({i.key(): i.val()})
+    return render(request, 'Customer/current_orders.html', {'orders': orders})
+
+
+def order(request):
+    uid = request.POST.get('restaurant')
+    all_list = database.child('Transactions').child('notDelivered').child(uid).get().each()
+    order = {}
+    for i in all_list:
+        order.update({i.key(): i.val()})
+    return render(request, 'Customer/order.html', {'order': order, 'uid': uid})
 
 
 def dashboard_view(request):
