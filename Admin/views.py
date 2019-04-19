@@ -21,6 +21,7 @@ data = {}
 for i in all_list:
     data.update({i.key(): i.val()})
 
+
 def home(request):
     all_list = database.get().each()
     data = {}
@@ -55,6 +56,7 @@ def home(request):
         deliverylist.update({name: d})
     return render(request, 'Admin/adminhome.html', {'ven_list': ven_list,'deliverylist':deliverylist})
 
+
 def delivererprofile(request):
     all_list = database.get().each()
     data = {}
@@ -74,7 +76,7 @@ def delivererprofile(request):
     curphone = deliver['phone']
     email=deliver['email']
     form = delivererform(initial={"address_line1": curaddress, 'city': curcity, "phone_number": curphone})
-    return render(request, 'Admin/delivererprofile.html',{'form': form,'name':name,'email':email})
+    return render(request, 'Admin/delivererprofile.html', {'form': form, 'name': name, 'email': email})
 
 
 def post_delivererprofile(request):

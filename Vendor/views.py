@@ -2,7 +2,6 @@ import pyrebase
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, reverse
 
-
 config = {
 	'apiKey': "AIzaSyC6MLEYIZxv7DHhs-vtmCB3rLkd1y2r3bI",
 	'authDomain': "mealsonwheelsiit.firebaseapp.com",
@@ -57,12 +56,12 @@ def curr_orders(request):
 		curr_vendor = curr_vendor_list[0]
 	else:
 		error_msg = {'msg': "You are not a registered Vendor!"}
-		return render(request, 'Authentication/login.html', error_msg)
+		return render(request, 'Authentication/login_page.html', error_msg)
 
 	# TODO: change delivered to notDelivered in next 3 lines.
-	not_delivered_orders = database.child('Transactions').child('delivered').shallow().get().val()
-	curr_transactions_list = [database.child('Transactions').child('delivered').child(i).get().val() for i in not_delivered_orders if database.child(
-		'Transactions').child('delivered').child(i).child('vendor').get().val() == curr_vendor]
+	not_delivered_orders = database.child('Transactions').child('notDelivered').shallow().get().val()
+	curr_transactions_list = [database.child('Transactions').child('notDelivered').child(i).get().val() for i in not_delivered_orders if database.child(
+								'Transactions').child('notDelivered').child(i).child('vendor').get().val() == curr_vendor]
 	context = {'curr_transactions_list': curr_transactions_list}
 	return render(request, 'Vendor/curr_orders.html', context)
 
@@ -75,10 +74,10 @@ def reviews(request):
 		curr_vendor = curr_vendor_list[0]
 	else:
 		error_msg = {'msg': "You are not a registered Vendor!"}
-		return render(request, 'Authentication/login.html', error_msg)
+		return render(request, 'Authentication/login_page.html', error_msg)
 
 	reviews_list = [database.child('Reviews').child(i).get().val() for i in database.child('Reviews').shallow().get().val() if database.child(
-					'Reviews').child(i).child('vendor').get().val() == curr_vendor]
+		'Reviews').child(i).child('vendor').get().val() == curr_vendor]
 	context = {'reviews_list': reviews_list}
 	return render(request, 'Vendor/reviews.html', context)
 
@@ -91,7 +90,7 @@ def post_menu(request):
 		curr_vendor = curr_vendor_list[0]
 	else:
 		error_msg = {'msg': "You are not a registered Vendor!"}
-		return render(request, 'Authentication/login.html', error_msg)
+		return render(request, 'Authentication/login_page.html', error_msg)
 
 	if request.method == 'POST':
 		category = request.POST.get('category')
@@ -125,7 +124,7 @@ def edit_details(request):
 		curr_vendor = curr_vendor_list[0]
 	else:
 		error_msg = {'msg': "You are not a registered Vendor!"}
-		return render(request, 'Authentication/login.html', error_msg)
+		return render(request, 'Authentication/login_page.html', error_msg)
 
 	vendor_details = database.child('Vendors').child(curr_vendor).get().val()
 	context = {'vendor_details': vendor_details}
@@ -139,8 +138,8 @@ def post_edit_details(request):
 	if curr_vendor_list:
 		curr_vendor = curr_vendor_list[0]
 	else:
-		error_msg = {'msg': "You are not a registered Vendor!"}
-		return render(request, 'Authentication/login.html', error_msg)
+		context = {'msg': "You are not a registered Vendor!"}
+		return render(request, 'Authentication/login_page.html', context)
 
 	# 3) Edit in database query
 	avgPrice = request.POST.get('avgPrice')
@@ -157,3 +156,7 @@ def post_edit_details(request):
 		'type': type,
 	})
 	return home(request, curr_vendor)
+
+
+def temp(request):
+	return render(request, 'Vendor/temp.html')
