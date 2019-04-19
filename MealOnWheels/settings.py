@@ -25,7 +25,9 @@ SECRET_KEY = '3^5(zfm0hk&e)5k*wrsp_k%h#xfi9u11$ez7(@-iz)r#ive#)b'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'mealsonwheels.pythonanywhere.com',
+]
 
 
 # Application definition
