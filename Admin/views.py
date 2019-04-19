@@ -129,7 +129,8 @@ def vendorprofile(request):
     form = vendorform(
         initial={"address": curaddress, 'city': curcity, "phone_number": curphone, "avgPrice": curavgPrice,
                  "closingTime": curclosingTime, "openingTime": curopeningTime, "type": curtype})
-    return render(request, 'Admin/vendorprofile.html', {'form': form, 'name': name, 'email': email,'location':location})
+    return render(request, 'Admin/vendorprofile.html',
+                  {'form': form, 'name': name, 'email': email, 'location': location})
 
 
 def post_vendorprofile(request):
@@ -156,7 +157,7 @@ def post_vendorprofile(request):
         closingTime = form.cleaned_data.get('closingTime')
         type = form.cleaned_data.get('type')
         newdata = {"address": addressfull, "phone": phone_number, "avgPrice": avgPrice, "openingTime": openingTime,
-                   "closingTime": closingTime, "type": type,'location':vendorLocation}
+                   "closingTime": closingTime, "type": type, 'location': vendorLocation}
         database.child("Vendors").child(uid).update(newdata)
         return redirect('Admin:home')
 
@@ -213,9 +214,42 @@ def addvendor(request):
                     return redirect('Admin:home')
             newdata = {"address": address, "avgPrice": avgPrice, "closingTime": closingTime, "email": email,
                        "name": name, 'noOfRatings': "0", "openingTime": openingTime, "phone": phone_number,
-                       'rating': "0", "type": type,'location':vendorLocation}
+                       'rating': "0", "type": type, 'location': vendorLocation}
             database.child("Vendors").push(newdata)
             return redirect('Admin:home')
     else:
         form = addvendorform()
     return render(request, 'Admin/addvendor.html', {'form': form})
+
+
+def delete_vendor(request):
+    name = request.GET.get('name')
+    all_list = database.child("Vendors").get().each()
+    vendors = {}
+    for i in all_list:
+        vendors.update({i.key(): i.val()})
+    for i in vendors:
+        if vendors[i]['name'] == name:
+            uid = i
+            break
+    database.child('Vendors').child(uid).remove()
+    all_menus = database.child("Vendors").get().each()
+    menu = {}
+    for i in all_menus:
+        menu.update({i.key(): i.val()})
+    if uid in menu:
+        database.child('Menus').child(uid).remove()
+    return redirect('Admin:home')
+
+def delete_deliverer(request):
+    name = request.GET.get('name')
+    all_list = database.child("Deliverers").get().each()
+    deliverers = {}
+    for i in all_list:
+        deliverers.update({i.key(): i.val()})
+    for i in deliverers:
+        if deliverers[i]['name'] == name:
+            uid = i
+            break
+    database.child('Deliverers').child(uid).remove()
+    return redirect('Admin:home')

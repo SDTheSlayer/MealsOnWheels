@@ -148,6 +148,11 @@
 
                             <input type="submit" class="btn btn-outline" value="Update">
 					  </form>
+                     <form method="post" action="{% url 'Admin:delete_deliverer' %}?name={{ name }}">
+                         {% csrf_token %}
+                         <input type="submit" class="btn btn-cta" value="Delete">
+                        </form>
+
 
 					 </div>
                  </div>

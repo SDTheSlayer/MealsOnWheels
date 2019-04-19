@@ -171,6 +171,10 @@
                       <div id="myMap" style="width:600px;height:400px;"></div><br>
                         <input type="submit" class="btn btn-cta" value="Update">
 					  </form>
+                        <form method="post" action="{% url 'Admin:delete_vendor' %}?name={{ name }}">
+                            					    {% csrf_token %}
+                             <input type="submit" class="btn btn-cta" value="Delete">
+                        </form>
 
 {#                  <form method="post" action="{% url 'Admin:post_vendorprofile' %}?name={{ name }}">#}
 {#                         {% csrf_token %}#}

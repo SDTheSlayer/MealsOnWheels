@@ -11,4 +11,6 @@ urlpatterns = [
     path('post_deliverer/', views.post_delivererprofile, name='post_delivererprofile'),
     path('adddeliverer/', views.adddeliverer, name='adddeliverer'),
     path('addvendor/', views.addvendor, name='addvendor'),
+    path('deletevendor/', views.delete_vendor, name='delete_vendor'),
+    path('deletedeliverer/', views.delete_deliverer, name='delete_deliverer'),
 ]
