@@ -50,7 +50,7 @@
 
             <span style="color: #ffffff;font-weight: bolder;font-style: initial">Total : {{ total }}</span>
 
-                <form type="Post" action="{% url 'Customer:postcart' %}">
+                <form type="Post" action="{% url 'Customer:post_cart' %}">
                     <input type="hidden" name="order" value="{{ order }}">
                     <input type="hidden" value="0"  name="pinlongitude" id="pinlongitude">
                     <input type="hidden" value="0"  name="pinlatitude" id="pinlatitude">

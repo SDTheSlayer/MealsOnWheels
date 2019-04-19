@@ -1,8 +1,12 @@
-from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, HttpResponse
 from .forms import ProfileForm, RatingForm
 import pyrebase
 import datetime
 import ast
+import string
+import random
+from . import Checksum
 
 config = {
     'apiKey': "AIzaSyC6MLEYIZxv7DHhs-vtmCB3rLkd1y2r3bI",
@@ -142,6 +146,61 @@ def assignDeliverer():
     return "No", "No"
 
 
+@login_required
+def transaction(request):
+    mid = 'gqHkIh40947005643657'
+    mkey = 'j1_MwAdMph_7xW0I'
+    orderID = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
+    channelid = 'WEB'
+    customers = database.child('Users').shallow().get().val()
+    curr_customer_list = [i for i in customers if database.child('Users').child(i).child('email').get().val() == request.user.email]
+    if curr_customer_list:
+        curr_customer = curr_customer_list[0]
+    else:
+        error_msg = {'msg': "You are not a registered Customer!"}
+        return render(request, 'Authentication/login_page.html', error_msg)
+    custID = curr_customer
+
+    mobileNo = database.child('Users').child(custID).child('phone').get().val()
+    email = request.user.email
+    txnAmount = request.GET.get('total')
+    website = 'WEBSTAGING'
+    industryTypeID = 'Retail'
+
+    context = {
+        'MID': mid,
+        'ORDER_ID': orderID,
+        'CHANNEL_ID': channelid,
+        'CUST_ID': custID,
+        'MOBILE_NO': mobileNo,
+        'EMAIL': email,
+        'TXN_AMOUNT': txnAmount,
+        'WEBSITE': website,
+        'INDUSTRY_TYPE_ID': industryTypeID,
+    }
+    paytmParams = context
+    paytmParams['CALLBACK_URL'] = 'https://mealsonwheels.pythonanywhere.com/customer/post_transaction'
+    check_sum_hash = Checksum.generate_checksum(paytmParams, mkey)
+    request.session['check_sum_hash'] = check_sum_hash
+    temp = {'context': context, 'CHECKSUMHASH': check_sum_hash}
+    return render(request, 'Customer/transaction.html', temp)
+
+
+def post_transaction(request):
+    if request.method == 'POST':
+        paytmParams = []
+        check_sum_hash = ''
+        for key in request.POST:
+            if key == 'CHECKSUMHASH':
+                check_sum_hash = request.POST[key]
+            else:
+                paytmParams += request.POST[key]
+        is_valid_check_sum = Checksum.verify_checksum(paytmParams, 'j1_MwAdMph_7xW0I', check_sum_hash)
+        if is_valid_check_sum:
+            database.child('Transactions').child('notDelivered').push(request.session['transactiondict'])
+    return HttpResponse('Request method is not post!')
+
+
 def post_cart(request):
     now = datetime.datetime.now()
     itemsOrdered = ast.literal_eval(request.GET.get('order'))
@@ -170,7 +229,8 @@ def post_cart(request):
         return redirect('Customer:home')
 
     if request.GET.get('transaction') == "paytm":
-        return redirect('Customer:home')
+        request.session['transactiondict'] = transactiondict
+        return transaction(request)
 
     database.child('Transactions').child('notDelivered').push(transactiondict)
     return redirect('Customer:home')

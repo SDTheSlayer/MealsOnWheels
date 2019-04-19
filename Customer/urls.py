@@ -12,4 +12,7 @@ urlpatterns = [
     path('postcart', views.post_cart, name='postcart'),
     path('currentorders',views.current_orders,name='currentorders'),
     path('order',views.order,name='order'),
+    # extras added
+    path('transaction', views.transaction, name='transaction'),
+    path('post_transaction', views.post_transaction, name='post_transaction'),
 ]
