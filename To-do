@@ -7,3 +7,4 @@ add @login_required
 redirect from login page
 paytm integration app
 paytm integration web
+add image vendor
