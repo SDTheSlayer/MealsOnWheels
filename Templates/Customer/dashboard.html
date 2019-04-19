@@ -1,32 +1,129 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-</head>
-<body>
-    <br>
-    {% for i,j in trans.items %}
-        Order date: {{ j.date }}<br>
-        Restaurant: {{ j.vendorname }}<br>
-        Items Ordered:<br>
-        {% for p,q in j.itemsOrdered.items %}
-            {{ p }}<br>
-            Quantity: {{ q.quantity }}<br>
-            Price: {{ q.price }}<br>
-        {% endfor %}
-        Payment Mode: {{ j.paymentMode }}<br>
-        Total Amount: {{ j.totalAmount }}<br>
+{% extends 'Customer/CusBase.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+body {
+    background-color: #f0ad4e;
+}
+#myUL {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+{#.star{#}
+{#      color: goldenrod;#}
+{#      font-size: 2.0rem;#}
+{#      padding: 0 1rem; /* space out the stars */#}
+{#    }#}
+{#    .star::before{#}
+{#      content: '\2606';#}
+{#      cursor: pointer;#}
+{#    }#}
+{#    .star:hover::before{#}
+{#      /* the :hover should come first */#}
+{#      content: '\2605';#}
+{#      color: #bada55;#}
+{#    }#}
+{#    .star.rated::before{#}
+{#      /* the :hover should come first */#}
+{#      content: '\2605';#}
+{#}#}
+</style>
+ <header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
+    <div class="gtco-container">
+        <div class="row">
+            <div class="col-md-12 col-md-offset-0 text-center">
+                <div class="row row-mt-15em">
+                    <div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
+                    {% if user.is_authenticated %}
+
+                      <span class="intro-text-small">Hello, <a href={% url 'Customer:profile' %} target="_blank">{{ user.first_name }} {{ user.last_name }}</a></span>
+                    {% else %}
+
+                      <a class="lead" href="{% url 'Authentication:login' %}"><input type="button" class="btn btn-primary btn-block" value="Login!"></a>
+                    {% endif %}
+
+                    <h1 class="cursive-font">Give your precious feedback <i class="icon-paper"></i></h1><br>
+{#							<span class="intro-text-small">Desire meets <a href="http://gettemplates.co" target="_blank">new Food</a></span>#}
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</header>
+
+
+    <br><br>
+<div class="gtco-section">
+    <div class="gtco-container">
+
+    <div class="row">
+<ul id="myUL">
+{% for i,j in trans.items %}
+
+  <li>
+      <div class="col-md-4 col-md-offset-1">
+      <div class="card" style="width: 40rem;">
+          <div class="card-header">
+            Order date: {{ j.date }}
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><span class="card-title cursive-font">
+                <h2>Restaurant: {{ j.vendorname }}</h2></span></li>
+            <li class="list-group-item">
+                <span style="text-underline: #0b0b0b;font-size: 25px;">Items Ordered:</span><br>
+            <ul>
+                    {% for p,q in j.itemsOrdered.items %}
+                        <li><span style="text-underline: #0b0b0b; color: black;">{{ p }}</span><br>
+                        Quantity: {{ q.quantity }}<br>
+                        Price: {{ q.price }}<br>
+                        </li>
+                    {% endfor %}
+            </ul>
+            </li>
+            <li class="list-group-item">Payment Mode: {{ j.paymentMode }}</li>
+            <li class="list-group-item">Total Amount: {{ j.totalAmount }}</li>
+
+          </ul>
+      <button onclick="add_review('{{ i }}')" class="btn btn-cta btn-success btn-block" style="margin-top: 10px;">Write your review</button>
+      <div id="{{ i }}" style="display: None;">
          <form method="post">
-        {% csrf_token %}
+            {% csrf_token %}
             <input type="hidden" value="{{ j.vendor }}" name="vendor">
              <input type="hidden" value="{{ j.customer }}" name="customer">
              <input type="hidden" value="{{ j.id }}" name="id">
-            <input type="text" onfocus="this.value=''" value="{{ j.review }}" name="review">
-            <input type="number" onfocus="this.value=''" min="0" max="5" value="{{ j.rating }}" name="rating">
-            <button type="submit">Submit</button>
+            <input type="text" onfocus="this.value=''" value="{{ j.review }}" name="review" size="35" aria-multiline="true">
+            <input type="number" onfocus="this.value=''" min="0" max="5" value="{{ j.rating }}" name="rating" style="width: 80px;"><br>
+            <button type="submit" class="btn btn-cta btn-success btn-block" style="margin-top: 10px;" onclick=msgbox()>Submit</button>
         </form>
+          </div>
         <br>
-    {% endfor %}
-</body>
-</html>
+        </div>
+      </div>
+  </li>
+{% endfor %}
+</ul>
+</div>
+    </div>
+</div>
+ <script>
+        function add_review(id) {
+
+            const x = document.getElementById(id);
+            if(x.style.display === "none"){
+                x.style.display = "block" ;
+            }
+            else{
+                x.style.display = "none";
+            }
+        }
+        function msgbox() {
+            alert('Your review has been added successfully!')
+        }
+        </script>
+{% endblock %}

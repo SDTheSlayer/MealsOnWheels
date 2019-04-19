@@ -9,6 +9,28 @@
 -->
 
 <html>
+    <script type='text/javascript'>
+        function GetMap() {
+            var map = new Microsoft.Maps.Map('#myMap', {
+                credentials:'ArQm8xOmwjqUgQPxLjEhNC4IYi1IC_1xmg3qhqPygrszIk-RLEB6wfir6-7m1kBO'
+            });
+            var center = map.getCenter();
+            //Add a green pushpin that has dragging enabled and events attached to it.
+            var bluePin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(center.latitude, center.longitude), { color: '#00f', draggable: true });
+            map.entities.push(bluePin);
+            document.getElementById('pinlongitude').value =center.longitude;
+            document.getElementById('pinlatitude').value = center.latitude;
+            Microsoft.Maps.Events.addHandler(bluePin, 'drag', function (e) { highlight('pushpinDrag', e); });
+            Microsoft.Maps.Events.addHandler(bluePin, 'dragend', function (e) { highlight('pushpinDragEnd', e); });
+            Microsoft.Maps.Events.addHandler(bluePin, 'dragstart', function (e) { highlight('pushpinDragStart', e); });
+        }
+        function highlight(id, event) {
+            //Highlight the mouse event div to indicate that the event has fired.
+            document.getElementById('pinlongitude').value = event.target.getLocation().longitude;
+            document.getElementById('pinlatitude').value = event.target.getLocation().latitude;
+        }
+    </script>
+    <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap' async defer></script>
 	<head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -59,6 +81,10 @@
 	<!--[if lt IE 9]>-->
 	<script src="{% static 'js/respond.min.js' %}"></script>
     <style>
+        input {
+            width: 30rem;
+        }
+
         input[type=submit]{
             background-color: #4CAF50;
             border: none;
@@ -68,6 +94,7 @@
             margin: 4px 2px;
             cursor: pointer;
         }
+
     </style>
 	<![endif]-->
 	</head>
@@ -110,7 +137,7 @@
 					<div class="row row-mt-15em">
 						<div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
 {#							<span class="intro-text-small">Desire meets <a href="http://gettemplates.co" target="_blank">new Food</a></span>#}
-                            <h1 class="cursive-font">Add Deliverer</h1><br>
+                            <h1 class="cursive-font">Add Vendor</h1><br>
 						</div>
 
 					</div>
@@ -127,8 +154,8 @@
         <div class="gtco-container text-justify">
 			<div class="register">
 				 <div class="register-top-grid">
-                    <br><br>
-					  <form method="post">
+                        <br><br>
+					  <form method="post" action="{% url 'Admin:addvendor' %}">
 					    {% csrf_token %}
                             {% for field in form %}
                                    <p>
@@ -143,9 +170,54 @@
                                 </p>
 
                             {% endfor %}
-                        <input type="submit" class="btn btn-outline" value="Update">
+                          <input type="hidden" value="0"  name="pinlongitude" id="pinlongitude">
+                          <input type="hidden" value="0"  name="pinlatitude" id="pinlatitude">
+                          <div id="myMap" style="width:600px;height:400px;"></div><br>
+                        <button type="submit" class="btn btn-success" style="margin-left: 10%;">Submit</button>
 					  </form>
 
+{#                     <form method="post" action="{% url 'Admin:addvendor' %}">#}
+{#                         {% csrf_token %}#}
+{#                             {% for field in form %}#}
+{#                                  {% if field == 'avgPrice' or field == 'type' or field == 'name' or field == 'email' %}#}
+{#                                     {{ field.label_tag }}<br>#}
+{#                                     <label>#}
+{#                                        <input type="text" name="{{ field }}" value="{{ field.value }}">#}
+{#                                     </label>#}
+{##}
+{#                                  {% elif field == 'closingTime' or field == 'openingTime' %}#}
+{#                                      {{ field.label_tag }}<br>#}
+{#                                      <label>#}
+{#                                        <input type="time" name="{{ field }}" value="{{ field.value }}">#}
+{#                                      </label>#}
+{##}
+{#                                  {% elif field == 'phone' %}#}
+{#                                      {{ field.label_tag }} <br>#}
+{#                                      <label>#}
+{#                                         <input type="tel" name="{{ field }}" value="{{ field.value }}" pattern="[1-9]{1}[0-9]{9}">#}
+{#                                      </label>#}
+{##}
+{#                                  {% elif field == 'address_line1' or  field == 'city' %}#}
+{#                                      {{ field.label_tag }}<br>#}
+{#                                      <label>#}
+{#                                         <input type="text" name="{{ field }}" value="{{ field.value }}">#}
+{#                                      </label>#}
+{##}
+{#                                  {% else %}#}
+{#                                        {{ field.label_tag }} <br>{{ field }}#}
+{#                                  {% endif %}#}
+{#                                    {% if field.help_text %}#}
+{#                                        <small style="font-style: italic"> <span class="text-danger">{{ field.help_text }}</span></small>#}
+{#                                    {% endif %}#}
+{#                                    {% for error in field.errors %}#}
+{#                                      <p style="color: red">{{ error }}</p>#}
+{#                                    {% endfor %}#}
+{#                                    <br>#}
+{#                             {% endfor %}#}
+{#                     <br><br>#}
+{#                        <button type="submit" class="btn btn-success" style="margin-left: 10%;">Submit</button>#}
+{#                        <br>#}
+{#                  </form>#}
 					 </div>
                  </div>
 				 </div>

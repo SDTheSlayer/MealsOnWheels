@@ -1,0 +1,45 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vendor</title>
+</head>
+<body>
+    <div id="test"></div>
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/5.9.4/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/5.9.4/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.9.4/firebase-database.js"></script>
+
+{#    <script src="https://www.gstatic.com/firebasejs/5.9.4/firebase.js"></script>#}
+    <script>
+        // Initialize Firebase
+        const config = {
+            apiKey: "AIzaSyC6MLEYIZxv7DHhs-vtmCB3rLkd1y2r3bI",
+            authDomain: "mealsonwheelsiit.firebaseapp.com",
+            databaseURL: "https://mealsonwheelsiit.firebaseio.com",
+            projectId: "mealsonwheelsiit",
+            storageBucket: "mealsonwheelsiit.appspot.com",
+            messagingSenderId: "755544742392"
+        };
+        firebase.initializeApp(config) ;
+
+        const database = firebase.database() ;
+        const not_delivered =  database.ref('Transactions/notDelivered') ;
+        not_delivered.on('value', function (snapshot) {
+            let obj = snapshot.val() ;
+            let inner_html = "" ;
+
+            for(let transaction in obj){
+                if(!obj.hasOwnProperty(transaction)) continue;
+                inner_html +=  "Customer - " + obj[transaction].customer + "<br>" ;
+                inner_html +=  "Date - " + obj[transaction].date + "<br>" ;
+                inner_html +=  "Total Amount - " + obj[transaction].totalAmount + "<br><br>" ;
+            }
+            document.getElementById('test').innerHTML = inner_html ;
+        })
+    </script>
+</body>
+</html>

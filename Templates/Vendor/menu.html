@@ -34,7 +34,7 @@
 			<div class="register">
 				 <div class="register-top-grid">
                  <br>
-    <h2><span class="popular-text" style="font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;">MENU</span></h2>
+    <h2><span class="popular-text" style="font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;">MENU</span></h2>
     <br><br>
     {# <div style="color: #666666; font-weight: 800"> #}
         {% for category,subcategorywise_dict in categorywise_dict.items %}
@@ -47,12 +47,12 @@
 {#                            {{ item_property_name }} : {{ item_property_value }}<br>#}
 {#                        {% endfor %} #}
                     {# </div> #}
-                    {% if item_properties.isSpicy == 'Yes' %}<i class="icon"><img src="{% static 'images/chili-pepper.png' %}">{% endif %}<br>
+                        {% if item_properties.isSpicy == 'Yes' %}<i class="icon"><img src="{% static 'images/chili-pepper.png' %}">{% endif %}</i><br>
                     <span style="float: right">
                                 {% if item_properties.mark == 'Veg' %}
-                                    <i class="icon"><img src="{% static 'images/icon-veg.png' %}">
+                                    <i class="icon"><img src="{% static 'images/icon-veg.png' %}"></i>
                                 {% else %}
-                                    <i class="icon"><img src="{% static 'images/icon-non-veg.png' %}">
+                                    <i class="icon"><img src="{% static 'images/icon-non-veg.png' %}"></i>
                                 {% endif %}
                     </span>
                     <i class="icon"><img src="{% static 'images/mixing.png' %}"><span class="text-info">&ensp; {{ item_properties.ingredients }}</span></i>
@@ -70,7 +70,7 @@
 
                 {% csrf_token %}
                 <input type="hidden" value="existing" id="flag" name="category">
-                 <div id="existing_category_input">
+                 <div id="existing_category_input" style="display: block;">
                     <label>
                         <select id="category_select" name="category_select">
                             <option disabled selected value> -- select an option -- </option>
@@ -86,7 +86,7 @@
                     </label>
                   </div>
                 <button id="existing_category_btn" onclick="toggle_category()" style="display: None;">Existing Category</button>
-                <button id="new_category_btn" onclick="toggle_category()">New Category</button>
+                <button id="new_category_btn" onclick="toggle_category()" style="display: block;">New Category</button>
                 <br>
                 Item Name:
                 <label>
@@ -176,7 +176,7 @@
             else{
                 d.style.display = "none";
             }
-        {#  TODO: Testing and Validation  #}
+        {# TODO: Testing and Validation  #}
         }
     </script>
 

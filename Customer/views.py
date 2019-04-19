@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, HttpResponseRedirect
 from .forms import ProfileForm, RatingForm
 import pyrebase
@@ -17,7 +18,21 @@ authe = firebase.auth()
 database = firebase.database()
 
 
+def check_customer(user):
+    all_list = database.child('Users').get().each()
+    users = {}
+    for i in all_list:
+        users.update({i.key(): i.val()})
+    for i in users:
+        if users[i]['email'] == user.email:
+            return True
+    return False
+
+
+@login_required
 def home(request):
+    if not check_customer(request.user):
+        return redirect('Authentication:home')
     all_list = database.child('Vendors').get().each()
     vendors = {}
     for i in all_list:
@@ -33,28 +48,38 @@ def home(request):
         phone = cur['phone']
         _type = cur['type']
         avgprice = cur['avgPrice']
+        rating = cur['rating']
         time = str(otime) + ":00 - " + str(ctime) + ":00"
         d = dict({'Address': addr, 'Time': time, 'Email': email, 'phone': phone,
-                  'Type': _type, 'Price': avgprice})
+                  'Type': _type, 'Price': avgprice, 'rating': rating})
         ven_list.update({name: d})
     return render(request, 'Customer/custhome.html', {'ven_list': ven_list})
 
 
+@login_required
 def rest_view(request):
+    if not check_customer(request.user):
+        return redirect('Authentication:home')
+
     all_list = database.get().each()
     data = {}
     for i in all_list:
         data.update({i.key(): i.val()})
     restname = request.POST.get('restaurant')
-    main = {}
-    dessert = {}
-    bev = {}
+
+    if restname is None:
+        return redirect('Customer:home')
 
     vendors = data['Vendors']
+    uid = -1
     for i in vendors:
         if vendors[i]['name'] == restname:
             uid = i
             break
+
+    if uid == -1:
+        return redirect('Customer:home')
+
     menu = data['Menus']
     if uid in menu:
         restmenu = menu[uid]
@@ -72,7 +97,11 @@ def rest_view(request):
         return redirect('Customer:home')
 
 
+@login_required
 def profile_view(request):
+    if not check_customer(request.user):
+        return redirect('Authentication:home')
+
     all_list = database.child('Users').get().each()
     users = {}
     for i in all_list:
@@ -104,29 +133,40 @@ def profile_view(request):
     return render(request, 'Customer/profile.html', {'form': form})
 
 
+@login_required
 def cart_view(request):
+    if not check_customer(request.user):
+        return redirect('Authentication:home')
+
     all_list = database.get().each()
     data = {}
     for i in all_list:
         data.update({i.key(): i.val()})
     restid = request.POST.get('restaurant')
+    if restid is None:
+        return redirect('Customer:home')
     order = {}
     total = 0
-    restmenu = data['Menus'][restid]
-    for j in restmenu:
-        for i in restmenu[j]:
-            item = restmenu[j][i]
-            quantity = request.POST.get(i)
-            quantity = int(quantity)
-            if quantity > 0:
-                price = item['price']
-                price = int(price)
-                item = dict({"quantity": quantity, "price": price})
-                order.update({i: item})
-                total = total + price * quantity
-    transaction = dict({"order": order, "restid": restid, "total": total})
-    return render(request, 'Customer/cart.html', {"order": order, "restid": restid, "total": total,
-                                                  "restname": data['Vendors'][restid]['name']})
+    if restid in data['Menus']:
+        restmenu = data['Menus'][restid]
+        for j in restmenu:
+            for i in restmenu[j]:
+                item = restmenu[j][i]
+                quantity = request.POST.get(i)
+                quantity = int(quantity)
+                if quantity > 0:
+                    price = item['price']
+                    price = int(price)
+                    item = dict({"quantity": quantity, "price": price})
+                    order.update({i: item})
+                    total = total + price * quantity
+        transaction = dict({"order": order, "restid": restid, "total": total})
+        if total == 0:
+            return redirect('Customer:home')
+        return render(request, 'Customer/cart.html', {"order": order, "restid": restid, "total": total,
+                                                      "restname": data['Vendors'][restid]['name']})
+
+    return redirect('Customer:home')
 
 
 def assignDeliverer():
@@ -142,25 +182,47 @@ def assignDeliverer():
     return "No", "No"
 
 
+@login_required
 def post_cart(request):
+    if not check_customer(request.user):
+        return redirect('Authentication:home')
+
     now = datetime.datetime.now()
-    itemsOrdered = ast.literal_eval(request.GET.get('order'))
+    itemsOrdered = request.GET.get('order')
+
     vendor = request.GET.get('restid')
     vendorName = request.GET.get('restname')
     totalAmount = request.GET.get('total')
     paymentMode = request.GET.get('transaction')
     date = str(now.day) + "/" + str(now.month) + "/" + str(now.year)
-    customerLocation = request.GET.get('pinlatitude') + "," + request.GET.get('pinlongitude')
     transactionId = "cash"
+
+    if (vendor is None) or (vendorName is None) or (totalAmount is None) or (paymentMode is None) or (
+            request.GET.get('pinlatitude') is None) or (itemsOrdered is None) or (
+            request.GET.get('transaction') is None) or (request.GET.get('pinlongitude') is None):
+        return redirect('Customer:home')
 
     delivererName, deliverer = assignDeliverer()
     all_list = database.child('Users').get().each()
     users = {}
+    customerLocation = request.GET.get('pinlatitude') + "," + request.GET.get('pinlongitude')
+    itemsOrdered = ast.literal_eval(request.GET.get('order'))
+    for i in itemsOrdered:
+        for j in itemsOrdered[i]:
+            itemsOrdered[i][j] = str(itemsOrdered[i][j])
+
     for i in all_list:
         users.update({i.key(): i.val()})
+
+    customer = -1
+
     for i in users:
         if users[i]['email'] == request.user.email:
             customer = i
+
+    if customer == -1:
+        return redirect('Customer:home')
+
     transactiondict = {'customer': customer, 'customerLocation': customerLocation, 'date': date,
                        'deliverer': deliverer, 'delivererLocation': ",", 'delivererName': delivererName,
                        'itemsOrdered': itemsOrdered, 'paymentMode': paymentMode, 'totalAmount': totalAmount,
@@ -176,21 +238,28 @@ def post_cart(request):
     return redirect('Customer:home')
 
 
+@login_required
 def current_orders(request):
+    if not check_customer(request.user):
+        return redirect('Authentication:home')
     user_list = database.child('Users').get().each()
-    all_list = database.child('Transactions').child('notDelivered').get().each()
+    trans_list = database.child('Transactions').child('notDelivered').get().each()
     orders = {}
     users = {}
     for i in user_list:
         users.update({i.key(): i.val()})
-    for i in all_list:
-        data = i.val()
-        if users[data['customer']]['email'] == request.user.email:
-            orders.update({i.key(): i.val()})
+    for i in trans_list:
+        trans = i.val()
+        if trans['customer'] in users:
+            if users[trans['customer']]['email'] == request.user.email:
+                orders.update({i.key(): i.val()})
     return render(request, 'Customer/current_orders.html', {'orders': orders})
 
 
+@login_required
 def order(request):
+    if not check_customer(request.user):
+        return redirect('Authentication:home')
     uid = request.POST.get('restaurant')
     all_list = database.child('Transactions').child('notDelivered').child(uid).get().each()
     order = {}
@@ -199,7 +268,10 @@ def order(request):
     return render(request, 'Customer/order.html', {'order': order, 'uid': uid})
 
 
+@login_required
 def dashboard_view(request):
+    if not check_customer(request.user):
+        return redirect('Authentication:home')
     all_list = database.get().each()
     data = {}
     for i in all_list:

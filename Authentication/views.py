@@ -64,7 +64,7 @@ def home(request):
         for i in delivery:
             curemail = delivery[i]['email']
             if curemail == request.user.email:
-                return render(request, 'Authentication/home.html', {'usertype': 'Delivery'})
+                return redirect('Authentication:logout')
 
         return redirect('Authentication:signup')
     else:

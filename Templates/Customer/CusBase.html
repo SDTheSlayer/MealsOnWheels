@@ -2,11 +2,7 @@
 {% load static %}
 
 <!DOCTYPE HTML>
-<!--
-	Aesthetic by gettemplates.co
-	Twitter: http://twitter.com/gettemplateco
-	URL: http://gettemplates.co
--->
+
 
 <html>
 	<head>
@@ -91,16 +87,15 @@
 				<div class="col-xs-8 text-right menu-1">
 					<ul>
                         <li><a href="{% url 'Customer:home' %}">Home</a></li>
-						<li><a href="{% url 'Customer:profile' %}">Profile</a></li>
 						<li class="has-dropdown">
-							<a href="#">Services</a>
+							<a href="#">Everything about you</a>
 							<ul class="dropdown">
-								<li><a href="#">Food Catering</a></li>
-								<li><a href="#">Wedding Celebration</a></li>
-								<li><a href="#">Birthday's Celebration</a></li>
+								<li><a href="{% url 'Customer:currentorders' %}">Current Orders</a></li>
+								<li><a href="{% url 'Customer:profile' %}">Profile</a></li>
+								<li><a href="{% url 'Customer:dashboard' %}">Dashboard</a></li>
 							</ul>
 						</li>
-						<li><a href="#">Contact</a></li>
+{#						<li><a href="#">Contact</a></li>#}
 
 {#                        LOGOUT BUTTON#}
                         <li class="btn-cta"><a href="{% url 'Authentication:logout' %}"><span>Logout</span></a></li>

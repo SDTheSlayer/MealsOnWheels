@@ -91,6 +91,8 @@
 				<div class="col-xs-8 text-right menu-1">
 					<ul>
                         <li><a href="{% url 'Admin:home' %}">Home</a></li>
+                        <li><a href="{% url 'Admin:addvendor' %}">Add Vendor</a></li>
+                        <li><a href="{% url 'Admin:adddeliverer' %}">Add Deliverer</a></li>
 {#                        LOGOUT BUTTON#}
                         <li class="btn-cta"><a href="{% url 'Authentication:logout' %}"><span>Logout</span></a></li>
 {#						<li class="btn-cta"><a href="{% url 'Customer:cart' %}"><span>Cart</span></a></li>#}
@@ -143,6 +145,7 @@
                                 </p>
 
                             {% endfor %}
+
                             <input type="submit" class="btn btn-outline" value="Update">
 					  </form>
 
