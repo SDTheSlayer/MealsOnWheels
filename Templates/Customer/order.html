@@ -36,10 +36,16 @@
           for(var transaction in obj){
                 if(!obj.hasOwnProperty(transaction)) continue;
                 if(transaction===document.getElementById('uid').innerText) {
+                    var temp = "none";
                     document.getElementById('delivererlocation').innerText = obj[transaction].delivererLocation;
                     document.getElementById('status').innerText = obj[transaction].status;
                     document.getElementById('customerLocation').innerText = obj[transaction].customerLocation;
+                    if (obj[transaction].status === 'picked'){
+                        temp = "";
+                    }
+                    document.getElementById('myMapdisplay').style.display=temp;
                     flag=true;
+
                 }
 
 
@@ -55,20 +61,23 @@
     </script>
      <script type='text/javascript'>
         function GetMapdisplay() {
-            var map = new Microsoft.Maps.Map('#myMapdisplay', {
-                credentials:'ArQm8xOmwjqUgQPxLjEhNC4IYi1IC_1xmg3qhqPygrszIk-RLEB6wfir6-7m1kBO'
-            });
+            if (document.getElementById('myMapdisplay').style.display!=="none") {
 
-            var deliverer = new Microsoft.Maps.Location.parseLatLong(document.getElementById('delivererlocation').innerText);
-            var customer=new Microsoft.Maps.Location.parseLatLong(document.getElementById('customerLocation').innerText);
-            //Add a green pushpin that has dragging enabled and events attached to it.
-            var bluePin = new Microsoft.Maps.Pushpin(deliverer, { color: '#00f', draggable: false });
-            map.entities.push(bluePin);
-            var redPin = new Microsoft.Maps.Pushpin(customer, { color: '#ff0000', draggable: false });
-            map.entities.push(redPin);
-            map.setView({
-            zoom: 13
-            });
+                var map = new Microsoft.Maps.Map('#myMapdisplay', {
+                    credentials: 'ArQm8xOmwjqUgQPxLjEhNC4IYi1IC_1xmg3qhqPygrszIk-RLEB6wfir6-7m1kBO'
+                });
+
+                var deliverer = new Microsoft.Maps.Location.parseLatLong(document.getElementById('delivererlocation').innerText);
+                var customer = new Microsoft.Maps.Location.parseLatLong(document.getElementById('customerLocation').innerText);
+                //Add a green pushpin that has dragging enabled and events attached to it.
+                var bluePin = new Microsoft.Maps.Pushpin(deliverer, {color: '#00f', draggable: false});
+                map.entities.push(bluePin);
+                var redPin = new Microsoft.Maps.Pushpin(customer, {color: '#ff0000', draggable: false});
+                map.entities.push(redPin);
+                map.setView({
+                    zoom: 13
+                });
+            }
         }
     </script>
     <script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMapdisplay' defer></script>
@@ -77,29 +86,31 @@
         var directionsManager;
         function GetMap()
         {
-            map = new Microsoft.Maps.Map('#myMap', {});
-            //Load the directions module.
-            Microsoft.Maps.loadModule('Microsoft.Maps.Directions', function () {
-                //Create an instance of the directions manager.
-                directionsManager = new Microsoft.Maps.Directions.DirectionsManager(map);
-                directionsManager.setRequestOptions({
-                    routeMode: Microsoft.Maps.Directions.RouteMode.driving
+            if (document.getElementById('myMapdisplay').style.display!=="none"){
+                map = new Microsoft.Maps.Map('#myMap', {});
+                //Load the directions module.
+                Microsoft.Maps.loadModule('Microsoft.Maps.Directions', function () {
+                    //Create an instance of the directions manager.
+                    directionsManager = new Microsoft.Maps.Directions.DirectionsManager(map);
+                    directionsManager.setRequestOptions({
+                        routeMode: Microsoft.Maps.Directions.RouteMode.driving
+                    });
+                    //Create waypoints to route between.
+                    var loc1 = new Microsoft.Maps.Location.parseLatLong(document.getElementById('delivererlocation').innerText);
+                    var loc2 = new Microsoft.Maps.Location.parseLatLong(document.getElementById('customerLocation').innerText);
+                    var seattleWaypoint = new Microsoft.Maps.Directions.Waypoint({address: 'Deliverer' ,location:loc1});
+                    var bluePin = new Microsoft.Maps.Pushpin(loc1, { color: '#00f', draggable: true });
+                    map.entities.push(bluePin);
+                    directionsManager.addWaypoint(seattleWaypoint);
+                    var workWaypoint = new Microsoft.Maps.Directions.Waypoint({ address:'Customer',location:loc2 });
+                    directionsManager.addWaypoint(workWaypoint);
+                    //Add event handlers to directions manager.
+                    Microsoft.Maps.Events.addHandler(directionsManager, 'directionsError', directionsError);
+                    Microsoft.Maps.Events.addHandler(directionsManager, 'directionsUpdated', directionsUpdated);
+                    //Calculate directions.
+                    directionsManager.calculateDirections();
                 });
-                //Create waypoints to route between.
-                var loc1 = new Microsoft.Maps.Location.parseLatLong(document.getElementById('delivererlocation').innerText);
-                var loc2 = new Microsoft.Maps.Location.parseLatLong(document.getElementById('customerLocation').innerText);
-                var seattleWaypoint = new Microsoft.Maps.Directions.Waypoint({address: 'Deliverer' ,location:loc1});
-                var bluePin = new Microsoft.Maps.Pushpin(loc1, { color: '#00f', draggable: true });
-                map.entities.push(bluePin);
-                directionsManager.addWaypoint(seattleWaypoint);
-                var workWaypoint = new Microsoft.Maps.Directions.Waypoint({ address:'Customer',location:loc2 });
-                directionsManager.addWaypoint(workWaypoint);
-                //Add event handlers to directions manager.
-                Microsoft.Maps.Events.addHandler(directionsManager, 'directionsError', directionsError);
-                Microsoft.Maps.Events.addHandler(directionsManager, 'directionsUpdated', directionsUpdated);
-                //Calculate directions.
-                directionsManager.calculateDirections();
-            });
+            }
         }
         function directionsUpdated(e) {
             //Get the current route index.

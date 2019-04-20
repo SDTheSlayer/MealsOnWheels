@@ -47,7 +47,6 @@ def home(request):
         data.update({i.key(): i.val()})
     if request.user.is_authenticated:
         if request.user.email == "mealsonwheelsiitg@gmail.com":
-            print(request.user.email)
             return redirect('Admin:home')
         customers = data['Users']
         for i in customers:

@@ -1,9 +1,14 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.shortcuts import render, redirect, HttpResponse
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
+
 from .forms import ProfileForm, RatingForm
 import pyrebase
 import datetime
 import ast
+import string
+import random
+from . import Checksum
 
 config = {
     'apiKey': "AIzaSyC6MLEYIZxv7DHhs-vtmCB3rLkd1y2r3bI",
@@ -133,6 +138,7 @@ def profile_view(request):
     return render(request, 'Customer/profile.html', {'form': form})
 
 
+@csrf_exempt
 @login_required
 def cart_view(request):
     if not check_customer(request.user):
@@ -165,7 +171,8 @@ def cart_view(request):
         transaction = dict({"order": order, "restid": restid, "total": total})
         if total == 0:
             return redirect('Customer:home')
-        total = total*1.14
+        total = total * 1.14
+        total = round(total)
         return render(request, 'Customer/cart.html', {"order": order, "restid": restid, "total": total,
                                                       "restname": data['Vendors'][restid]['name']})
 
@@ -179,13 +186,70 @@ def assignDeliverer():
         deliverers.update({i.key(): i.val()})
     for i in deliverers:
         if deliverers[i]['isFree'] == "Yes":
-            database.child('Deliverers').child(i).update({'isFree': "No"})
+            database.child('Deliverers').child(i).update({'isFree': "Processing"})
             return deliverers[i]['name'], i
 
     return "No", "No"
 
 
+@csrf_exempt
 @login_required
+def transaction(request, transactiondict):
+    mid = 'gqHkIh40947005643657'
+    mkey = b'j1_MwAdMph_7xW0I'
+    orderID = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
+    channelid = 'WEB'
+    customers = database.child('Users').shallow().get().val()
+    curr_customer_list = [i for i in customers if
+                          database.child('Users').child(i).child('email').get().val() == request.user.email]
+    if curr_customer_list:
+        curr_customer = curr_customer_list[0]
+    else:
+        error_msg = {'msg': "You are not a registered Customer!"}
+        return render(request, 'Authentication/login_page.html', error_msg)
+    custID = curr_customer
+
+    mobileNo = database.child('Users').child(custID).child('phone').get().val()
+    email = request.user.email
+    txnAmount = request.GET.get('total')
+    website = 'WEBSTAGING'
+    industryTypeID = 'Retail'
+
+    context = {
+        'MID': mid,
+        'ORDER_ID': orderID,
+        'CHANNEL_ID': channelid,
+        'CUST_ID': custID,
+        'MOBILE_NO': mobileNo,
+        'EMAIL': email,
+        'TXN_AMOUNT': txnAmount,
+        'WEBSITE': website,
+        'INDUSTRY_TYPE_ID': industryTypeID,
+    }
+    paytmParams = context
+    paytmParams['CALLBACK_URL'] = 'https://mealsonwheels.pythonanywhere.com/customer/post_transaction'
+    check_sum_hash = Checksum.generate_checksum(paytmParams, mkey)
+    request.session['check_sum_hash'] = check_sum_hash
+    temp = {'context': context, 'CHECKSUMHASH': check_sum_hash}
+
+    database.child('Transactions').child('notDelivered').child(orderID).set(transactiondict)
+    return render(request, 'Customer/transaction.html', temp)
+
+
+@csrf_exempt
+def post_transaction(request):
+    if request.user.is_authenticated:
+        return redirect('Authentication:home')
+    if request.method == 'POST':
+        if request.POST.get('STATUS') != 'TXN_SUCCESS':
+            database.child('Transactions').child('notDelivered').child(request.POST.get('ORDERID')).remove()
+    deliverer = database.child('Transactions').child('notDelivered').child(request.POST.get('ORDERID')).child(
+        'deliverer').get().val()
+    database.child('Deliverers').child(deliverer).update({'isFree': "InProcess"})
+    return redirect('Authentication:home')
+
+
+@csrf_exempt
 def post_cart(request):
     if not check_customer(request.user):
         return redirect('Authentication:home')
@@ -198,11 +262,11 @@ def post_cart(request):
     totalAmount = request.GET.get('total')
     paymentMode = request.GET.get('transaction')
 
-
     date = str(now.day) + "/" + str(now.month) + "/" + str(now.year)
     transactionId = "cash"
 
-    if (itemsOrdered is None) or (vendor is None) or (vendorName is None) or (totalAmount is None) or (paymentMode is None) or (
+    if (itemsOrdered is None) or (vendor is None) or (vendorName is None) or (totalAmount is None) or (
+            paymentMode is None) or (
             request.GET.get('pinlatitude') is None) or (itemsOrdered is None) or (
             request.GET.get('transaction') is None) or (request.GET.get('pinlongitude') is None):
         return redirect('Customer:home')
@@ -237,9 +301,9 @@ def post_cart(request):
         return redirect('Customer:home')
 
     if request.GET.get('transaction') == "paytm":
-        return redirect('Customer:home')
-
+        return transaction(request, transactiondict)
     database.child('Transactions').child('notDelivered').push(transactiondict)
+    database.child('Deliverers').child(deliverer).update({'isFree': "InProcess"})
     return redirect('Customer:home')
 
 
@@ -270,8 +334,9 @@ def order(request):
         return redirect('Customer:home')
     all_list = database.child('Transactions').child('notDelivered').child(uid).get().each()
     order = {}
-    for i in all_list:
-        order.update({i.key(): i.val()})
+    if all_list is not None:
+        for i in all_list:
+            order.update({i.key(): i.val()})
     return render(request, 'Customer/order.html', {'order': order, 'uid': uid})
 
 
@@ -283,7 +348,7 @@ def dashboard_view(request):
     data = {}
     for i in all_list:
         data.update({i.key(): i.val()})
-
+    uid = -1
     users = data['Users']
     all_reviews = data['Reviews']
     for i in users:
@@ -291,6 +356,8 @@ def dashboard_view(request):
         if cur_user['email'] == request.user.email:
             uid = i
             break
+    if uid == -1:
+        return redirect('Customer:home')
     if request.method == 'POST':
         form = RatingForm(request.POST)
         if form.is_valid():
@@ -299,12 +366,15 @@ def dashboard_view(request):
             review = form.cleaned_data.get('review')
             id = form.cleaned_data.get('id')
             customer = form.cleaned_data.get('customer')
-            curr_rating = float(data['Vendors'][vendor]['rating'])
-            noOfRatings = int(data['Vendors'][vendor]['noOfRatings'])
-            curr_rating = (curr_rating * noOfRatings + int(rating)) / (noOfRatings + 1)
-            noOfRatings = noOfRatings + 1
-            database.child('Vendors').child(vendor).child('rating').set(str(curr_rating))
-            database.child('Vendors').child(vendor).child('noOfRatings').set(str(noOfRatings))
+
+            if vendor in data['Vendors'].keys():
+                print(data['Vendors'].keys())
+                curr_rating = float(data['Vendors'][vendor]['rating'])
+                noOfRatings = int(data['Vendors'][vendor]['noOfRatings'])
+                curr_rating = (curr_rating * noOfRatings + int(rating)) / (noOfRatings + 1)
+                noOfRatings = noOfRatings + 1
+                database.child('Vendors').child(vendor).child('rating').set(str(curr_rating))
+                database.child('Vendors').child(vendor).child('noOfRatings').set(str(noOfRatings))
             newdata = {'customer': customer, 'rating': rating, 'review': review, 'vendor': vendor}
 
             database.child("Reviews").child(id).set(newdata)
@@ -322,7 +392,7 @@ def dashboard_view(request):
                 paymentMode = del_trans[j]['paymentMode']
                 totalAmount = del_trans[j]['totalAmount']
                 vendor = del_trans[j]['vendor']
-                vendor_name = data['Vendors'][vendor]['name']
+                vendor_name = del_trans[j]['vendorName']
                 if j in all_reviews.keys():
                     curr_rating = float(all_reviews[j]['rating'])
                     curr_review = all_reviews[j]['review']

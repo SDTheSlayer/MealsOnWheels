@@ -15,6 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -22,9 +23,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '3^5(zfm0hk&e)5k*wrsp_k%h#xfi9u11$ez7(@-iz)r#ive#)b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'mealsonwheels.pythonanywhere.com',
+    '127.0.0.1',
+]
+
 
 # Application definition
 
@@ -70,6 +75,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'MealOnWheels.wsgi.application'
 
+
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -79,6 +85,7 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -98,6 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -110,6 +118,7 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
@@ -141,3 +150,6 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '9zgEqS2HRaYWq4n102z9QeUM'
 LOGIN_URL = 'Authentication:login'
 LOGIN_REDIRECT_URL = 'Authentication:home'
 LOGOUT_REDIRECT_URL = 'Authentication:home'
+
+CSRF_TRUSTED_ORIGINS = ['securegw-stage.paytm.in']
+CSRF_COOKIE_SECURE = False
