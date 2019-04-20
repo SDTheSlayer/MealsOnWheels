@@ -66,14 +66,13 @@
 
         <div id="add_item_id" style="display: None;">
 
-            <form action="{% url 'Vendor:post_menu' %}" method="POST">
+            <form action="{% url 'Vendor:post_menu' %}" method="POST" id="f1">
 
                 {% csrf_token %}
-                <input type="hidden" value="existing" id="flag" name="category">
+                 <input type="hidden" value="existing" id="flag" name="category">
                  <div id="existing_category_input">
                     <label>
                         <select id="category_select" name="category_select">
-                            <option disabled selected value> -- select an option -- </option>
                             {% for category in categorywise_dict %}
                                 <option value="{{ category }}">{{ category }}</option>
                             {% endfor %}
@@ -82,7 +81,7 @@
                 </div>
                 <div id="new_category_input" style="display: None;">
                     <label>
-                        <input id="category_input" name="category_input">
+                        <input required id="category_input" name="category_input">
                     </label>
                   </div>
                 <button id="existing_category_btn" onclick="toggle_category()" style="display: None;">Existing Category</button>
@@ -90,8 +89,9 @@
                 <br>
                 Item Name:
                 <label>
-                    <input required name="item">
+                    <input id="item" name="item">
                 </label>
+                <span style="font-size: small; color: tomato;" id="error_item"></span>
                 <br>
                  <div style="margin-left: 40px;">
                     Ingredients:
@@ -100,17 +100,24 @@
                     </label>
                     <br>
                     Mark:
-                    <label>
-                        <input name="mark">
-                    </label>
-                    <br>
+{#                    <label>#}
+{#                        <input name="mark">#}
+{#                    </label>#}
+                     <label>
+                         <select name="mark">
+                             <option value="Veg">Veg</option>
+                             <option value="NonVeg">Non-Veg</option>
+                         </select>
+                     </label>
+                     <br>
                     Price:
                     <label>
-                        <input required name="price">
+                        <input name="price" id="price">
                     </label>
+                     <span id="error_price" style="font-size: small; color: tomato;"></span>
                     <br>
                  </div>
-                <button type="submit" class="btn btn-success">Submit</button>
+                <button type="button" onclick="validate_price();" class="btn btn-success">Submit</button>
             </form>
          </div>
     {# </div> #}
@@ -120,6 +127,22 @@
 </div>
     </div>
     <script>
+        function validate_price(){
+
+            let a = document.getElementById('error_price') ;
+            const A = parseFloat(document.getElementById('price').value) ;
+            if(document.getElementById('item').value === ""){
+                document.getElementById('error_item').innerText = 'Item name is required!' ;
+                return ;
+            }
+            if(A <= 0 || isNaN(A)){
+                a.innerText = 'Price is invalid!' ;
+                return ;
+            }
+            a.innerText = '' ;
+            document.getElementById('f1').submit() ;
+            return true ;
+        }
         function add_item() {
             const x = document.getElementById("add_item_id");
             if(x.style.display === "none"){
@@ -141,9 +164,13 @@
             const category = document.getElementById("flag").value;
             if(category === 'existing'){
                 document.getElementById("flag").value = 'new';
+                document.getElementById("new_category_input").focus() ;
+                document.getElementById("existing_category_input").focus() ;
             }
             else{
                 document.getElementById("flag").value = 'existing';
+                document.getElementById("new_category_input").focus() ;
+                document.getElementById("existing_category_input").focus() ;
             }
 
             document.getElementById('category_input').value = "" ;

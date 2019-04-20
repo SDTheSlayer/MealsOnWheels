@@ -35,7 +35,7 @@
 			<div class="register">
 				 <div class="register-top-grid">
 
-                    <form method="post" action="{% url 'Vendor:post_edit_details' %}">
+                    <form method="post" action="{% url 'Vendor:post_edit_details' %}" id="f1">
                         {% csrf_token %}
 {#                        {% for detail,detail_value in vendor_details.items %}#}
 {#                            {% if detail == 'avgPrice' or detail == 'type' %}#}
@@ -65,14 +65,26 @@
                             </p>
                         <span class="cursive-font"><h3>Editable details</h3></span><br>
                             <p>
-                                Average Price for 2 : <input type="text" name="avgPrice" value="{{ vendor_details.avgPrice }}"><br><br>
-                                <span class="icon-clock"></span> Time :   <input type="time" name="openingTime" value="{{ vendor_details.openingTime }}"> to <input type="time" name="{{ closingTime  }}" value="{{ vendor_details.closingTime }}"><br><br>
-                                <span class="icon-phone"></span> Phone :   <input type="tel" name="phone" value="{{ vendor_details.phone }}"><br><br>
+                                Average Price for 2 : <input type="text" name="avgPrice" id="avgPrice" value="{{ vendor_details.avgPrice }}"><span style="font-size:
+                                small;
+                                color:
+                                tomato;"
+                                                                                                                                     id="error_avg"></span><br><br>
+                                <span class="icon-clock"></span> Time :   <input type="text" name="openingTime" id="openingTime" size="5" maxlength="5" value="
+{{ vendor_details.openingTime }}">
+                                to <input
+                                    type="text" name="closingTime" maxlength="5" size="5" id="closingTime" value="{{ vendor_details.closingTime }}"><span
+                                    style="font-size: small;
+                                    color:
+                                    tomato;"
+                                    id="error_time"></span><br><br>
+                                <span class="icon-phone"></span> Phone :   <input type="tel" name="phone" id="phone_" value="{{ vendor_details.phone }}"
+                                                                                  pattern="[1-9]{1}[0-9]{9}"><span
+                                     style="font-size: small; color: tomato;" id="error_phone"></span><br><br>
 {#                                <span class="icon-star-outlined"></span> Rating :   <input type="number" name="rating" value="{{ vendor_details.rating }}"><br><br>#}
                                 <span class="ti-direction"></span> Type :   <input type="text" name="type" value="{{ vendor_details.type }}"><br><br>
                             </p>
-
-                        <button type="submit" class="btn btn-success">Submit</button>
+                        <button type="button" onclick="submit_f1();" class="btn btn-success">Submit</button>
                     </form>
                  </div>
             </div>
@@ -81,4 +93,74 @@
 </div>
 
     {# TODO: Validation in javascript #}
+    <script>
+        function validate_avg(){
+            let a = document.getElementById('error_avg') ;
+            const A = parseFloat(document.getElementById('avgPrice').value) ;
+            console.log(A) ;
+            if(A <= 0 || isNaN(A)){
+                a.innerText = 'Average Price is invalid!' ;
+                return false ;
+            }
+            a.innerText = '' ;
+            return true ;
+        }
+        function validate_time() {
+            let o = document.getElementById('openingTime').value ;
+            let c = document.getElementById('closingTime').value ;
+            console.log(o) ;
+            console.log(c) ;
+
+            if(o === '' || c === ''){
+                document.getElementById('error_time').innerText = 'Time can not be empty' ;
+                return false ;
+            }
+            if(o.length !== 5 || c.length !== 5 || o[2]!==':' || c[2] !== ':'){
+                console.log('there') ;
+                document.getElementById('error_time').innerText = 'Enter time in 24 hr format. Eg: 09:05' ;
+                return false ;
+            }
+            let oh = o.substring(0,2) ;
+            let om = o.substring(3,4) ;
+            let ch = c.substring(0,2) ;
+            let cm = c.substring(3,5) ;
+            console.log(oh) ;
+            console.log(om) ;
+            console.log(ch) ;
+            console.log(cm) ;
+            if(isNaN(parseInt(oh)) || isNaN(parseInt(ch)) || isNaN(parseInt(om)) || isNaN(parseInt(cm))){
+                document.getElementById('error_time').innerText = 'Enter time in 24 hr format. Eg: 09:05' ;
+                return false ;
+            }
+            if(parseInt(oh) > parseInt(ch)){
+                console.log('here') ;
+                document.getElementById('error_time').innerText = 'Closing Time can not be earlier than opening time.' ;
+                return false ;
+            }
+            else if(parseInt(oh) === parseInt(ch) && parseInt(om) > parseInt(cm)){
+                document.getElementById('error_time').innerText = 'Closing Time can not be earlier than opening time.' ;
+                return false ;
+            }
+            document.getElementById('error_time').innerText = '' ;
+            return true ;
+        }
+        function validate_phone(){
+            const n = parseInt(document.getElementById('phone_').value) ;
+            console.log(document.getElementById('phone_').value) ;
+            if(isNaN(n) || n.toString().length !== 10 || n < 1000000000){
+                document.getElementById('error_phone').innerText = 'Phone Number is invalid!' ;
+                return false ;
+            }
+            document.getElementById('error_phone').innerText = '' ;
+            return true ;
+        }
+        function validations() {
+            return validate_avg() & validate_time() & validate_phone() ;
+        }
+        function submit_f1() {
+            if(validations()){
+                document.getElementById('f1').submit() ;
+            }
+        }
+    </script>
 {% endblock %}
