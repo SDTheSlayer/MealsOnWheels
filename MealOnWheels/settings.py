@@ -150,3 +150,5 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '9zgEqS2HRaYWq4n102z9QeUM'
 LOGIN_URL = 'Authentication:login'
 LOGIN_REDIRECT_URL = 'Authentication:home'
 LOGOUT_REDIRECT_URL = 'Authentication:home'
+
+CSRF_TRUSTED_ORIGINS = ['securegw-stage.paytm.in']

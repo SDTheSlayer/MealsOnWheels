@@ -186,6 +186,7 @@ def transaction(request):
     return render(request, 'Customer/transaction.html', temp)
 
 
+@login_required
 def post_transaction(request):
     if request.method == 'POST':
         paytmParams = []
