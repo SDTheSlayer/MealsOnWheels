@@ -6,7 +6,7 @@ import hashlib
 from Crypto.Cipher import AES
 
 
-IV = "@@@@&&&&####$$$$"
+IV = b'@@@@&&&&####$$$$'
 BLOCK_SIZE = 16
 
 
@@ -25,7 +25,7 @@ def generate_checksum(param_dict, merchant_key, salt=None):
 
 def generate_refund_checksum(param_dict, merchant_key, salt=None):
     for i in param_dict:    
-        if "|" in param_dict[i] :
+        if "|" in param_dict[i]:
             param_dict = {}
             exit()
     params_string = __get_param_string__(param_dict)
@@ -101,13 +101,13 @@ def __encode__(to_encode, iv, key):
     to_encode = __pad__(to_encode)
     # Encrypt
     c = AES.new(key, AES.MODE_CBC, iv)
-    to_encode = c.encrypt(to_encode)
+    to_encode = c.encrypt(to_encode.encode("utf-8"))
     # Encode
     to_encode = base64.b64encode(to_encode)
     return to_encode.decode("UTF-8")
 
 
-def __decode__(to_decode, iv, key):
+def __decode__(to_decode,    iv, key):
     # Decode
     to_decode = base64.b64decode(to_decode)
     # Decrypt

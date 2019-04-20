@@ -149,7 +149,7 @@ def assignDeliverer():
 @login_required
 def transaction(request):
     mid = 'gqHkIh40947005643657'
-    mkey = 'j1_MwAdMph_7xW0I'
+    mkey = b'j1_MwAdMph_7xW0I'
     orderID = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
     channelid = 'WEB'
     customers = database.child('Users').shallow().get().val()
@@ -179,7 +179,7 @@ def transaction(request):
         'INDUSTRY_TYPE_ID': industryTypeID,
     }
     paytmParams = context
-    paytmParams['CALLBACK_URL'] = 'https://mealsonwheels.pythonanywhere.com/customer/post_transaction'
+    paytmParams['CALLBACK_URL'] = 'https://127.0.0.1:8000/customer/post_transaction'
     check_sum_hash = Checksum.generate_checksum(paytmParams, mkey)
     request.session['check_sum_hash'] = check_sum_hash
     temp = {'context': context, 'CHECKSUMHASH': check_sum_hash}
@@ -226,10 +226,12 @@ def post_cart(request):
                        'transactionId': transactionId, 'vendor': vendor, 'status': "Cooking", 'vendorName': vendorName}
 
     if deliverer == "No":
+        print('No deliverer is free!')
         return redirect('Customer:home')
 
     if request.GET.get('transaction') == "paytm":
         request.session['transactiondict'] = transactiondict
+        print('transaction via paytm!')
         return transaction(request)
 
     database.child('Transactions').child('notDelivered').push(transactiondict)

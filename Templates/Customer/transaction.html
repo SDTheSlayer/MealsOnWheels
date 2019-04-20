@@ -10,8 +10,8 @@
         {% for key,value in context.items %}
             <input type="hidden" name="{{ key }}" value="{{ value }}">
         {% endfor %}
-        <input type="hidden" name="CALLBACK_URL" value="https://mealsonwheels.pythonanywhere.com/customer/post_transaction">
-        <input type="hidden" name="CHECKSUMHASH" value="{{ context.CHECKSUMHASH }}">
+        <input type="hidden" name="CALLBACK_URL" value="{% url 'Customer:post_transaction' %}">
+        <input type="hidden" name="CHECKSUMHASH" value="{{ CHECKSUMHASH }}">
     </form>
 
     <script>
