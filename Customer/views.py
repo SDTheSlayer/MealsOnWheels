@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, HttpResponse
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 
 from .forms import ProfileForm, RatingForm
 import pyrebase
@@ -110,6 +110,7 @@ def profile_view(request):
     return render(request, 'Customer/profile.html', {'form': form})
 
 
+@csrf_exempt
 def cart_view(request):
     all_list = database.get().each()
     data = {}
@@ -148,9 +149,9 @@ def assignDeliverer():
     return "No", "No"
 
 
-@csrf_protect
+@csrf_exempt
 @login_required
-def transaction(request):
+def transaction(request, transactiondict):
     mid = 'gqHkIh40947005643657'
     mkey = b'j1_MwAdMph_7xW0I'
     orderID = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
@@ -186,26 +187,22 @@ def transaction(request):
     check_sum_hash = Checksum.generate_checksum(paytmParams, mkey)
     request.session['check_sum_hash'] = check_sum_hash
     temp = {'context': context, 'CHECKSUMHASH': check_sum_hash}
+
+    database.child('Transactions').child('notDelivered').child(orderID).set(transactiondict)
     return render(request, 'Customer/transaction.html', temp)
 
 
-@csrf_protect
-@login_required
+@csrf_exempt
 def post_transaction(request):
+    if request.user.is_authenticated:
+        return redirect('Authentication:home')
     if request.method == 'POST':
-        paytmParams = []
-        check_sum_hash = ''
-        for key in request.POST:
-            if key == 'CHECKSUMHASH':
-                check_sum_hash = request.POST[key]
-            else:
-                paytmParams += request.POST[key]
-        is_valid_check_sum = Checksum.verify_checksum(paytmParams, 'j1_MwAdMph_7xW0I', check_sum_hash)
-        if is_valid_check_sum:
-            database.child('Transactions').child('notDelivered').push(request.session['transactiondict'])
-    return render(request, 'Customer/post_transaction.html')
+        if request.POST.get('STATUS') != 'TXN_SUCCESS':
+            database.child('Transactions').child('notDelivered').child(request.POST.get('ORDERID')).remove()
+    return redirect('Customer:home')
 
 
+@csrf_exempt
 def post_cart(request):
     now = datetime.datetime.now()
     itemsOrdered = ast.literal_eval(request.GET.get('order'))
@@ -235,9 +232,7 @@ def post_cart(request):
         return redirect('Customer:home')
 
     if request.GET.get('transaction') == "paytm":
-        request.session['transactiondict'] = transactiondict
-        print('transaction via paytm!')
-        return transaction(request)
+        return transaction(request, transactiondict)
 
     database.child('Transactions').child('notDelivered').push(transactiondict)
     return redirect('Customer:home')
