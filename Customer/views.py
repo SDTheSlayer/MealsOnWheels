@@ -1,5 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, HttpResponse
+from django.views.decorators.csrf import csrf_protect
+
 from .forms import ProfileForm, RatingForm
 import pyrebase
 import datetime
@@ -146,6 +148,7 @@ def assignDeliverer():
     return "No", "No"
 
 
+@csrf_protect
 @login_required
 def transaction(request):
     mid = 'gqHkIh40947005643657'
@@ -186,6 +189,7 @@ def transaction(request):
     return render(request, 'Customer/transaction.html', temp)
 
 
+@csrf_protect
 @login_required
 def post_transaction(request):
     if request.method == 'POST':

@@ -152,3 +152,4 @@ LOGIN_REDIRECT_URL = 'Authentication:home'
 LOGOUT_REDIRECT_URL = 'Authentication:home'
 
 CSRF_TRUSTED_ORIGINS = ['securegw-stage.paytm.in']
+CSRF_COOKIE_SECURE = False
