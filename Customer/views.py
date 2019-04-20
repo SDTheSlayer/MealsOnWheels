@@ -198,7 +198,7 @@ def post_transaction(request):
         is_valid_check_sum = Checksum.verify_checksum(paytmParams, 'j1_MwAdMph_7xW0I', check_sum_hash)
         if is_valid_check_sum:
             database.child('Transactions').child('notDelivered').push(request.session['transactiondict'])
-    return HttpResponse('Request method is not post!')
+    return render(request, 'Customer/post_transaction.html')
 
 
 def post_cart(request):
