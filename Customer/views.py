@@ -179,7 +179,7 @@ def transaction(request):
         'INDUSTRY_TYPE_ID': industryTypeID,
     }
     paytmParams = context
-    paytmParams['CALLBACK_URL'] = 'https://127.0.0.1:8000/customer/post_transaction'
+    paytmParams['CALLBACK_URL'] = 'https://mealsonwheels.pythonanywhere.com/customer/post_transaction'
     check_sum_hash = Checksum.generate_checksum(paytmParams, mkey)
     request.session['check_sum_hash'] = check_sum_hash
     temp = {'context': context, 'CHECKSUMHASH': check_sum_hash}
