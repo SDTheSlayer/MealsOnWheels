@@ -1,6 +1,26 @@
 {% extends 'Customer/CusBase.html' %}
 {% load static %}
 {% block content %}
+<style>
+    p {
+        color: #0b0b0b;
+    }
+    body {
+        background-color: #FBB448;
+    }
+    hr {
+      display: block;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+      margin-left: auto;
+      margin-right: auto;
+      border-style: inset;
+      border-width: 1px;
+    }
+</style>
+
+
+
     <script type='text/javascript'>
         function GetMap() {
             var map = new Microsoft.Maps.Map('#myMap', {
@@ -10,6 +30,8 @@
             //Add a green pushpin that has dragging enabled and events attached to it.
             var bluePin = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(center.latitude, center.longitude), { color: '#00f', draggable: true });
             map.entities.push(bluePin);
+            document.getElementById('pinlongitude').value =center.longitude;
+            document.getElementById('pinlatitude').value = center.latitude;
             Microsoft.Maps.Events.addHandler(bluePin, 'drag', function (e) { highlight('pushpinDrag', e); });
             Microsoft.Maps.Events.addHandler(bluePin, 'dragend', function (e) { highlight('pushpinDragEnd', e); });
             Microsoft.Maps.Events.addHandler(bluePin, 'dragstart', function (e) { highlight('pushpinDragStart', e); });
@@ -24,36 +46,86 @@
 
 
 
-    <header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
+<header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
     <div class="overlay"></div>
-        <br><br><br><br>
-    <div class="gtco-container">
+
+        <div class="gtco-container">
+        <div class="row">
         <div class="col-md-12 col-md-offset-0 text-center">
-        <div class="animate-box" data-animate-effect="fadeInUp">
-            <h2 class="cursive-font"><span class="icon">
-							<i class="ti-shopping-cart icon"></i>
-					</span>Order Summary:</h2>
+            <div class="row row-mt-15em">
+                <div class="animate-box" data-animate-effect="fadeInUp">
+                    <h1 class="cursive-font"><span class="icon">
+                                    <i class="ti-shopping-cart icon"></i>
+                            </span>Order Summary:</h1>
+                                <br><br><br><br>
+                            <span class="intro-text-small" style="font-weight: bold;font-size: 40px;">{{ restname }}</span><br><br>
 
-                    <span class="intro-text-small" style="font-weight: bold">{{ restname }}</span><br><br>
-                {% for i,j in order.items %}
 
-                    <span style="font-style: inherit;color: #f0ad4e">{{ i }}</span>
-                    <br><p>
-                    {% for k,l in j.items %}
-                        {{ k }} : {{ l }}
-                    <br>
-                    {% endfor %}
-                    </p><br>
-                {% endfor %}
-
-            <span style="color: #ffffff;font-weight: bolder;font-style: initial">Total : {{ total }}</span>
-            {#                        <input type="hidden" value="0"  name="pinlongitude" id="pinlongitude">#}
-            {#                          <input type="hidden" value="0"  name="pinlatitude" id="pinlatitude">#}
-        <div id="myMap" style="position:relative;width:600px;height:400px;"></div>
-                </div>
+        </div>
+        </div>
         </div>
     </div>
+        </div>
 </header>
+
+    <div class="gtco-section">
+        <div class="gtco-container center-block text-justify">
+            <div class="col-md-4 col-md-offset-2 ">
+
+
+                <div class="card" style="width: 40rem;">
+                  <div class="card-header">
+                    Ordered items:
+                  </div>
+                  <ul class="list-group list-group-flush">
+                  {% for i,j in order.items %}
+                    <li class="list-group-item"><span class="card-title" style="font-family: "Helvetica Neue", Helvetica, Arial, sans-serif">
+                        <h4><span style="font-style: inherit;color: #;font-size: 20px;">{{ i }}</span></h4></span></li>
+
+
+                    <li class="list-group-item">
+                    <ul>
+                        <li>Quantity : {{ j.quantity }} </li>
+                        <li>Price : ₹{{ j.price }}</li>
+                    </ul>
+
+{#                        {% for k,l in j.items %}#}
+{#                            {{ k }} : {{ l }}#}
+{#                        <br>#}
+{#                        {% endfor %}#}
+                    </li>
+
+                    {% endfor %}
+                  </ul>
+                </div>
+
+
+
+                     <span style="color: #0b0b0b;font-weight: bolder;font-style: initial; font-size: 30px;">Total :  ₹{{ total }}</span>  <form type="Post" action="{% url 'Customer:postcart' %}">
+                    <input type="hidden" name="order" value="{{ order }}">
+                    <input type="hidden" value="0"  name="pinlongitude" id="pinlongitude">
+                    <input type="hidden" value="0"  name="pinlatitude" id="pinlatitude">
+                    <input type="hidden" name="total" value="{{ total }}">
+                    <input type="hidden" name="restid" value="{{ restid }}">
+                    <input type="hidden" name="restname" value="{{ restname }}">
+
+                    <hr>
+                    <span style="font-weight: bolder;font-size: 25px;">Payment options:</span><br>
+                    <span style="font-style: inherit;color: #3f3f3f"><input type="radio" name="transaction" value="Cash on Delivery" checked="checked">Cash On Delivery<br>
+                        <input type="radio" name="transaction" value="paytm">Paytm</span
+
+
+                    <br><br><br><br><br>
+                <hr>
+                <span style="font-weight: bolder;font-size: 25px;">Confirm Your Location</span><br>
+                    <div id="myMap" style="width:600px;height:400px;"></div><br>
+                    <input style="margin-left: 45%" type="submit" class="btn btn-block" value="Confirm"><br><br>
+                </form>
+                </div>
+            </div>
+
+    </div>
+</div>
 
 
 

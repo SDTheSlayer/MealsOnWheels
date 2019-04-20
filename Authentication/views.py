@@ -27,7 +27,7 @@ for i in all_list:
 # Create your views here.
 def login_page(request):
     if request.user.is_authenticated:
-        redirect('Authentication:home')
+        return redirect('Authentication:home')
     return render(request, 'Authentication/login_page.html')
 
 
@@ -35,7 +35,7 @@ def logout_view(request):
     if request.user.is_authenticated:
         logout(request)
         return redirect('Authentication:login')
-    redirect('Authentication:login')
+    return redirect('Authentication:login')
 
 
 def home(request):
@@ -47,6 +47,7 @@ def home(request):
         data.update({i.key(): i.val()})
     if request.user.is_authenticated:
         if request.user.email == "mealsonwheelsiitg@gmail.com":
+            print(request.user.email)
             return redirect('Admin:home')
         customers = data['Users']
         for i in customers:
@@ -64,7 +65,7 @@ def home(request):
         for i in delivery:
             curemail = delivery[i]['email']
             if curemail == request.user.email:
-                return render(request, 'Authentication/home.html', {'usertype': 'Delivery'})
+                return redirect('Authentication:logout')
 
         return redirect('Authentication:signup')
     else:

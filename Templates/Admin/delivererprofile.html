@@ -91,6 +91,8 @@
 				<div class="col-xs-8 text-right menu-1">
 					<ul>
                         <li><a href="{% url 'Admin:home' %}">Home</a></li>
+                        <li><a href="{% url 'Admin:addvendor' %}">Add Vendor</a></li>
+                        <li><a href="{% url 'Admin:adddeliverer' %}">Add Deliverer</a></li>
 {#                        LOGOUT BUTTON#}
                         <li class="btn-cta"><a href="{% url 'Authentication:logout' %}"><span>Logout</span></a></li>
 {#						<li class="btn-cta"><a href="{% url 'Customer:cart' %}"><span>Cart</span></a></li>#}
@@ -108,7 +110,9 @@
 					<div class="row row-mt-15em">
 						<div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
 {#							<span class="intro-text-small">Desire meets <a href="http://gettemplates.co" target="_blank">new Food</a></span>#}
-				 			<h1 class="cursive-font">Hello Admin</h1>
+                            <h1 class="cursive-font">Update Profile</h1><br>
+                            <h2><span class="intro-text-small" style="font-weight: bold">{{ name }}
+                          <br>Email : {{ email }}<br></span></h2>
 						</div>
 
 					</div>
@@ -141,8 +145,14 @@
                                 </p>
 
                             {% endfor %}
-                        <input type="submit" class="btn btn-outline" value="Update">
+
+                            <input type="submit" class="btn btn-outline" value="Update">
 					  </form>
+                     <form method="post" action="{% url 'Admin:delete_deliverer' %}?name={{ name }}">
+                         {% csrf_token %}
+                         <input type="submit" class="btn btn-cta" value="Delete">
+                        </form>
+
 
 					 </div>
                  </div>

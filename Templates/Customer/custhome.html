@@ -26,10 +26,81 @@ function myFunction() {
         }
     }
 }
+
+function sort_getvalue(value) {
+    if (value === 'avgPrice_asc')
+    {
+        sort_AvgPrice_asc('avgPrice')
+    }
+    else if (value === 'avgPrice_dsc')
+    {
+        sort_AvgPrice_dsc('avgPrice')
+    }
+    else if(value === 'rating_asc')
+    {
+        sort_AvgPrice_asc('rating')
+    }
+    else if(value === 'rating_dsc')
+    {
+        sort_AvgPrice_dsc('rating')
+    }
+    else if(value === 'name')
+    {
+        sort_AvgPrice_asc('name')
+    }
+}
+function sort_AvgPrice_asc(id) {
+
+    var ul, switching, b, shouldSwitch;
+    ul = document.getElementById("myUL");
+    switching = true;
+     while (switching)
+     {
+
+         switching = false;
+        b = ul.getElementsByTagName("li");
+        for (i = 0; i < (b.length - 1); i++) {
+            shouldSwitch = false;
+            if (b[i].getElementsByClassName(id)[0].innerText > b[i + 1].getElementsByClassName(id)[0].innerText) {
+                shouldSwitch = true;
+                break;
+            }
+        }
+        if (shouldSwitch) {
+      b[i].parentNode.insertBefore(b[i + 1], b[i]);
+
+      switching = true;
+    }
+     }
+}
+function sort_AvgPrice_dsc(id) {
+
+    var ul, switching, b, shouldSwitch;
+    ul = document.getElementById("myUL");
+    switching = true;
+     while (switching)
+     {
+
+         switching = false;
+        b = ul.getElementsByTagName("li");
+        for (i = 0; i < (b.length - 1); i++) {
+            shouldSwitch = false;
+            if (b[i].getElementsByClassName(id)[0].innerText < b[i + 1].getElementsByClassName(id)[0].innerText) {
+                shouldSwitch = true;
+                break;
+            }
+        }
+        if (shouldSwitch) {
+      b[i].parentNode.insertBefore(b[i + 1], b[i]);
+
+      switching = true;
+    }
+     }
+}
         </script>
 
-        <header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
-		<div class="overlay"></div>
+<header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
+    <div class="overlay"></div>
 		<div class="gtco-container">
 			<div class="row">
 				<div class="col-md-12 col-md-offset-0 text-center">
@@ -42,7 +113,7 @@ function myFunction() {
                             #if customer is not logged in, give login button
                           <a class="lead" href="{% url 'Authentication:login' %}"><input type="button" class="btn btn-primary btn-block" value="Login!"></a>
 	                    {% endif %}
-{#							<span class="intro-text-small">Desire meets <a href="http://gettemplates.co" target="_blank">new Food</a></span>#}
+
 				 			<h1 class="cursive-font">Taste all our delicacies!</h1>
 						</div>
 
@@ -64,6 +135,20 @@ function myFunction() {
 					<p>Choose from the best near you!</p>
                     {# search bar #}
                 <input id="myInput" onkeyup="myFunction()" placeholder="Search for restaurants.." title="Type in a name" type="text" size="50">
+{#                    <button onclick="sort_AvgPrice_asc('avgPrice')">Average Price</button>#}
+{#                    <button onclick="sort_AvgPrice_asc('rating')">Average Rating</button>#}
+{#                    <button onclick="sort_AvgPrice_asc('name')">Name</button>#}
+
+                    <select onclick="sort_getvalue(this.value)" style="width: 10em; height: 2em;">
+                        <option value="name_asc">Name</option>
+                        <option value="" selected disabled hidden>Choose filter</option>
+                          <option value="avgPrice_asc">Price: Low to High</option>
+                          <option value="avgPrice_dsc">Price: High to Low</option>
+                          <option value="rating_asc">Rating: Low to High</option>
+                          <option value="rating_dsc">Rating: High to Low</option>
+
+                    </select>
+
 				</div>
 
 
@@ -74,6 +159,9 @@ function myFunction() {
             <ul id="myUL">
                 {% for i,j in ven_list.items %}
                     <li > <span  hidden>{{ i }}</span>
+                        <span class="avgPrice" hidden>{{ j.Price }}</span>
+                        <span class="rating" hidden>{{ j.rating }}</span>
+                        <span class="name" hidden>{{ i }}</span>
                  <form method="POST" action="{% url 'Customer:restaurant' %}">
                     {% csrf_token %}
 				    <div class="col-lg-4 col-md-4 col-sm-6">
@@ -91,18 +179,18 @@ function myFunction() {
 
                             <span class="intro-text-small">
 							<p>
-                                {{ j.Address }}<br>
-                                {{ j.Time }}<br>
+                                <span class="icon-map"></span> {{ j.Address }}<br>
+                                <span class="icon-clock"></span> {{ j.Time }}<br>
                                 <span style="color:orange; font-weight: bold;">Type : {{ j.Type }}</span>
                                 <br>
                                 <span class="gtco-contact">
-                                    {{ j.phone }}<br>
+                                    <span class="icon-phone"></span> {{ j.phone }}<br>
                                     {{ j.Email }}
                                 </span>
 
                             </p>
                             </span>
-							<p><span class="price cursive-font">₹{{ j.Price }} for 2</span></p>
+							<p><span class="price cursive-font">₹{{ j.Price }} for 2<br>{{ j.rating }} <span class="icon-star2"></span></p>
                     </div>
 					</div>
 

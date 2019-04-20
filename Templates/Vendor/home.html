@@ -1,36 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Vendor</title>
-</head>
-<body>
-    Hello there!
+{% extends 'Vendor/vendorBase.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    body {
+        background-color: rgba(255,165,0,0.7);
+    }
+
+</style>
+    <header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url({% static 'images/img_bg_1.jpg' %})" data-stellar-background-ratio="0.5">
+		<div class="overlay"></div>
+		<div class="gtco-container">
+			<div class="row">
+				<div class="col-md-12 col-md-offset-0 text-center">
+					<div class="row row-mt-15em">
+						<div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
+                        {% if user.is_authenticated %}
+                            <h1 class="cursive-font">Hello, {{ name }}!</h1>
+                          <span class="intro-text-small">Your Email: <a href="{% url 'Vendor:edit_details' %}">{{ email }}</a></span>
+                            {# Hello, <a href={% url 'Customer:profile' %} target="_blank">{{ user.first_name }} {{ user.last_name }}</a> #}
+                        {% else %}
+
+                          <a class="lead" href="{% url 'Authentication:login' %}"><input type="button" class="btn btn-primary btn-block" value="Login!"></a>
+	                    {% endif %}
+{#							<span class="intro-text-small">Desire meets <a href="http://gettemplates.co" target="_blank">new Food</a></span>#}
+
+						</div>
+
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+	</header>
+    <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
     <br>
     <br>
-    {{ address }}
+
+    <h3>{{ type }}</h3>
     <br>
-    {{ closingTime }}
+        <h3><span class="icon-map"></span>  {{ address }}</h3>
     <br>
-    {{ email }}
+        <h3><span class="icon-clock"></span>  {{ openingTime }} to {{ closingTime }}</h3>
+
+
     <br>
-    {{ name }}
+    <h3><span class="icon-phone"></span>  {{ phone }}</h3>
     <br>
-    {{ openingTime }}
+        <h3>Average Rating: {{ rating }}  <span class="icon-star"></span></h3>
     <br>
-    {{ phone }}
-    <br>
-    {{ type }}
-    <br>
-    {{ rating }}
-    <br>
-    <br>
-    <a href="{% url 'Vendor:edit_details' %}">Edit Details</a>
-    <br>
-    <a href="{% url 'Vendor:menu' %}">See Menu</a>
-    <br>
-    <a href="{% url 'Vendor:curr_orders' %}">Current Orders</a>
-    <br>
-    <a href="{% url 'Vendor:reviews' %}">Reviews</a>
-</body>
-</html>
+    {# <br> #}
+    {# <a href="{% url 'Authentication:login' %}">Edit Details</a> #}
+    {# <br> #}
+    {# <a href="{% url 'Vendor:menu' %}">See Menu</a> #}
+    {# <br> #}
+    {# <a href="{% url 'Vendor:curr_orders' %}">Current Orders</a> #}
+    {# <br> #}
+    {# <a href="{% url 'Vendor:reviews' %}">Reviews</a> #}
+    </div>
+{% endblock %}
